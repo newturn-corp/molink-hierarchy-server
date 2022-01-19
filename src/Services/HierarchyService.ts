@@ -13,7 +13,7 @@ class HierarchyService {
     async registerClient (client: Client) {
         const hierarchyUser = client.hierarchyUser as User
         if (hierarchyUser && !this.hierarchyMap.has(hierarchyUser.id)) {
-            const cache = await CacheService.hierarchyLiveRedis.get(`hierarchy-general-${hierarchyUser.id}`)
+            const cache = await CacheService.redis.get(`hierarchy-general-${hierarchyUser.id}`)
             if (!cache) {
                 throw new HierarchyNotExists()
             }
@@ -34,7 +34,7 @@ class HierarchyService {
     }
 
     async refreshHierarchyInfoLastUsedAt (userId: number) {
-        const cache = await CacheService.hierarchyLiveRedis.get(`hierarchy-general-${userId}`)
+        const cache = await CacheService.redis.get(`hierarchy-general-${userId}`)
         if (!cache) {
             throw new HierarchyNotExists()
         }
@@ -43,7 +43,7 @@ class HierarchyService {
         const newHierarchy = Automerge.change(hierarchy, hierarchy => {
             hierarchy.lastUsedAt = new Date()
         })
-        await setAutomergeDocumentAtRedis(CacheService.hierarchyLiveRedis, `hierarchy-general-${userId}`, newHierarchy)
+        await setAutomergeDocumentAtRedis(CacheService.redis, `hierarchy-general-${userId}`, newHierarchy)
     }
 
     handleCreateNewDocument (client: Client, info: HierarchyDocumentInfoInterface) {
