@@ -26,11 +26,13 @@ class HierarchyService {
             this.clientsHierarchyDependencyMap.set(hierarchyUser.id, new Map())
         }
         this.clientsHierarchyDependencyMap.get(hierarchyUser.id)?.set(client.id, client)
+        console.log(`client ${client.id} registered at ${hierarchyUser.nickname}'s hierarchy`)
     }
 
     deregisterClient (client: Client) {
         const hierarchyUser = client.hierarchyUser as User
         this.clientsHierarchyDependencyMap.get(hierarchyUser.id)?.delete(client.id)
+        console.log(`client ${client.id} deregistered at ${hierarchyUser.nickname}'s hierarchy`)
     }
 
     async refreshHierarchyInfoLastUsedAt (userId: number) {
