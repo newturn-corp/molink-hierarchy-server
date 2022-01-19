@@ -8,6 +8,7 @@ Slack.init(env.slack.token)
 
 const app = express()
     .use(express.static('build'))
+    .get('/health-check', (req, res) => res.status(200).end())
 
 const httpServer = app.listen(env.port, () => console.log(`Listening on ${env.port}`))
 
