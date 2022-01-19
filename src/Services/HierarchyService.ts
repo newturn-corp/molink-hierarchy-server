@@ -1,10 +1,11 @@
 import Automerge from 'automerge'
 import { Client } from '../Client'
-import { HierarchyNotExists, InvalidDocumentLocation } from '../Errors/HierarchyError'
+import { HierarchyChangeTimeout, HierarchyNotExists, InvalidDocumentLocation } from '../Errors/HierarchyError'
 import CacheService from './CacheService'
 import { HierarchyDocumentInfoInterface, HierarchyInfoInterface, HierarchyChangeEventDTO } from '@newturn-develop/types-molink'
 import { setAutomergeDocumentAtRedis } from '@newturn-develop/molink-utils'
 import User from '../Domain/User'
+import { v4 as uuidV4 } from 'uuid'
 
 class HierarchyService {
     private hierarchyMap = new Map<number, Automerge.FreezeObject<HierarchyInfoInterface>>()
@@ -48,7 +49,7 @@ class HierarchyService {
         await setAutomergeDocumentAtRedis(CacheService.redis, `hierarchy-general-${userId}`, newHierarchy)
     }
 
-    handleCreateNewDocument (client: Client, info: HierarchyDocumentInfoInterface) {
+    async handleCreateNewDocument (client: Client, info: HierarchyDocumentInfoInterface) {
         const hierarchyUser = client.hierarchyUser as User
         const hierarchy = this.hierarchyMap.get(hierarchyUser.id)
         if (!hierarchy) {
@@ -71,13 +72,34 @@ class HierarchyService {
             })
         })
         const changes = Automerge.getChanges(hierarchy, newHierarchy)
-        const dependencyClients = this.clientsHierarchyDependencyMap.get(hierarchyUser.id)?.values()
-        if (!dependencyClients) {
-            return
-        }
-        for (const client of dependencyClients) {
-            client.socket.emit('change', new HierarchyChangeEventDTO(changes, 'createDocument'))
-        }
+        await this.sendChangeToDependencyClients(client, changes)
+    }
+
+    sendChangeToDependencyClients (client: Client, changes: Automerge.BinaryChange[]) {
+        return new Promise<void>((resolve, reject) => {
+            const changeId = uuidV4()
+            const hierarchyUser = client.hierarchyUser as User
+            const dependencyClients = this.clientsHierarchyDependencyMap.get(hierarchyUser.id)?.values()
+            if (!dependencyClients) {
+                return
+            }
+
+            let isHandled = false
+            client.socket.once(`change-${changeId}-handled`, () => {
+                isHandled = true
+                resolve()
+            })
+            setTimeout(() => {
+                if (isHandled) {
+                    return
+                }
+                isHandled = true
+                reject(new HierarchyChangeTimeout())
+            }, 5000)
+            for (const client of dependencyClients) {
+                client.socket.emit('change', new HierarchyChangeEventDTO(changeId, changes))
+            }
+        })
     }
 }
 export default new HierarchyService()

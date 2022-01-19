@@ -17,8 +17,8 @@ export class MainController {
 
     async handleCreateDocument (data: CreateDocumentDTO) {
         const info = await DocumentService.createDocument(this.userId, data)
-        HierarchyService.handleCreateNewDocument(this.client, info)
-        this.client.socket.emit('createDocumentResponse', new CreateDocumentResponseDTO(info.id))
+        await HierarchyService.handleCreateNewDocument(this.client, info)
+        this.client.socket.emit('create-document-response', new CreateDocumentResponseDTO(info.id))
     }
 
     async handleDisconnect () {
