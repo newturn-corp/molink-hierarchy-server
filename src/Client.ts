@@ -18,23 +18,32 @@ export class Client {
     constructor (socket: Socket) {
         this.socket = socket
         this.id = socket.id
-        console.log(socket.nsp.name.slice(1, socket.nsp.name.length))
     }
 
     async init () {
-        console.log('client init')
+        console.log(`client connected. socketId: ${this.id}`)
+
         await this.authorizeUser()
         if (!this.user) {
+            console.log(`socket ${this.id} close. Reason: Unauthorized`)
             return this.socket.leave(this.id)
         }
-        this.mainController = new MainController(this.user?.id as number, this)
+
+        await this.setHierarchyUser()
+        if (!this.hierarchyUser) {
+            console.log(`socket ${this.id} close. Reason: No HierarchyUser`)
+            return this.socket.leave(this.id)
+        }
+
+        console.log(`user ${this.user.id} connected hierarchy name: ${this.hierarchyUser.nickname}, id: ${this.hierarchyUser.id}`)
+
+        this.mainController = new MainController(this.user.id, this)
         await HierarchyService.registerClient(this)
     }
 
     async setHierarchyUser () {
         const hierarchyUser = await UserRepo.getActiveUserByNickname(this.socket.nsp.name.slice(1, this.socket.nsp.name.length))
         this.hierarchyUser = hierarchyUser
-        console.log(this.hierarchyUser)
     }
 
     async authorizeUser () {
