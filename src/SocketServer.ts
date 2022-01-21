@@ -12,7 +12,10 @@ export class SocketServer {
     constructor (httpServer: http.Server) {
         this.nodeId = uuidV4()
         this.server = new Server(httpServer, {
-            transports: ['websocket']
+            transports: ['websocket'],
+            cors: {
+                credentials: true
+            }
         })
     }
 
