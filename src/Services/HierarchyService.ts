@@ -52,6 +52,7 @@ class HierarchyService {
             return
         }
         const newHierarchy = Automerge.change(hierarchy, hierarchy => {
+            console.log(hierarchy)
             hierarchy.map[info.id] = info
             const location = info.location.split(',').map(index => Number(index))
             if (location.length === 0) {
