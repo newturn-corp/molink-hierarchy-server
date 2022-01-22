@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@newturn-develop/molink-utils": "^0.0.11",
+    "@newturn-develop/molink-utils": "^0.0.12",
     "@newturn-develop/types-molink": "^0.0.15",
     "@slack/web-api": "^6.5.1",
     "@types/lodash": "^4.14.178",

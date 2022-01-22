@@ -82,6 +82,7 @@ class HierarchyService {
 
             let isHandled = false
             client.socket.once(`change-${changeId}-handled`, () => {
+                console.log(`client ${client.id}: change ${changeId} handled`)
                 isHandled = true
                 resolve()
             })
@@ -89,10 +90,13 @@ class HierarchyService {
                 if (isHandled) {
                     return
                 }
+                console.log(`client ${client.id}: change ${changeId} timeout`)
+
                 isHandled = true
                 reject(new HierarchyChangeTimeout())
             }, 5000)
             for (const client of dependencyClients) {
+                console.log(`client ${client.id}: send change event`)
                 client.socket.emit('change', new HierarchyChangeEventDTO(changeId, changes))
             }
         })
