@@ -52,11 +52,17 @@ class HierarchyService {
             return
         }
         const newHierarchy = Automerge.change(hierarchy, hierarchy => {
-            console.log(hierarchy)
             hierarchy.map[info.id] = info
             const location = info.location.split(',').map(index => Number(index))
             if (location.length === 0) {
                 throw new InvalidDocumentLocation()
+            }
+            if (location.length === 1) {
+                hierarchy.list[location[0]] = {
+                    id: info.id,
+                    children: []
+                }
+                return
             }
             const order = location.pop() as number
             const block = hierarchy.list[location.shift() as number]
@@ -68,6 +74,8 @@ class HierarchyService {
                 children: []
             })
         })
+        this.hierarchyMap.set(hierarchyUser.id, newHierarchy)
+        await setAutomergeDocumentAtRedis(CacheService.redis, `hierarchy-general-${hierarchyUser.id}`, newHierarchy)
         const changes = Automerge.getChanges(hierarchy, newHierarchy)
         await this.sendChangeToDependencyClients(client, changes)
     }

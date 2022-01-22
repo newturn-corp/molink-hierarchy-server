@@ -16,7 +16,7 @@ export class MainController {
     }
 
     async handleCreateDocument (data: CreateDocumentDTO) {
-        console.log(`Client: ${this.client.id}: Handle Create Document Event ${data}`)
+        console.log(`Client: ${this.client.id}: Handle Create Document Event ${JSON.stringify(data)}`)
         const info = await DocumentService.createDocument(this.userId, data)
         await HierarchyService.handleCreateNewDocument(this.client, info)
         this.client.socket.emit('create-document-response', new CreateDocumentResponseDTO(info.id))
