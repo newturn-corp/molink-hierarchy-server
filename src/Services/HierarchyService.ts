@@ -3,7 +3,7 @@ import { Client } from '../Client'
 import { HierarchyChangeTimeout, HierarchyNotExists, InvalidDocumentLocation } from '../Errors/HierarchyError'
 import CacheService from './CacheService'
 import { HierarchyDocumentInfoInterface, HierarchyInfoInterface, HierarchyChangeEventDTO } from '@newturn-develop/types-molink'
-import { setAutomergeDocumentAtRedis } from '@newturn-develop/molink-utils'
+import { getAutomergeDocumentFromRedis, setAutomergeDocumentAtRedis } from '@newturn-develop/molink-utils'
 import User from '../Domain/User'
 import { v4 as uuidV4 } from 'uuid'
 
@@ -14,13 +14,11 @@ class HierarchyService {
     async registerClient (client: Client) {
         const hierarchyUser = client.hierarchyUser as User
         if (hierarchyUser && !this.hierarchyMap.has(hierarchyUser.id)) {
-            const cache = await CacheService.redis.get(`hierarchy-general-${hierarchyUser.id}`)
-            if (!cache) {
+            const hierarchy = await getAutomergeDocumentFromRedis<HierarchyInfoInterface>(CacheService.redis, `hierarchy-general-${hierarchyUser.id}`)
+            if (!hierarchy) {
                 throw new HierarchyNotExists()
             }
-            const serializedHierarchy = JSON.parse(cache).data
-            console.log(serializedHierarchy)
-            this.hierarchyMap.set(hierarchyUser.id, Automerge.load(serializedHierarchy))
+            this.hierarchyMap.set(hierarchyUser.id, hierarchy)
         }
         const dependency = this.clientsHierarchyDependencyMap.get(hierarchyUser.id)
         if (!dependency) {
@@ -37,12 +35,10 @@ class HierarchyService {
     }
 
     async refreshHierarchyInfoLastUsedAt (userId: number) {
-        const cache = await CacheService.redis.get(`hierarchy-general-${userId}`)
-        if (!cache) {
+        const hierarchy = await getAutomergeDocumentFromRedis<HierarchyInfoInterface>(CacheService.redis, `hierarchy-general-${userId}`)
+        if (!hierarchy) {
             throw new HierarchyNotExists()
         }
-        const serializedHierarchy = JSON.parse(cache).data
-        const hierarchy = Automerge.load<HierarchyInfoInterface>(serializedHierarchy)
         const newHierarchy = Automerge.change(hierarchy, hierarchy => {
             hierarchy.lastUsedAt = new Date()
         })

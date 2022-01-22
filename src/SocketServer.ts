@@ -7,7 +7,6 @@ import NamespaceMiddleware from './Middlewares/NamespaceMiddleware'
 export class SocketServer {
     nodeId: string
     server: Server
-    clientMap: Map<string, Client> = new Map()
 
     constructor (httpServer: http.Server) {
         this.nodeId = uuidV4()
@@ -29,6 +28,5 @@ export class SocketServer {
     async handleConnect (socket: Socket) {
         const client = new Client(socket)
         client.init()
-        this.clientMap.set(client.id, client)
     }
 }
