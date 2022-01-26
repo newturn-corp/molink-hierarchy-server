@@ -10,6 +10,7 @@ import { getAutomergeDocumentFromRedis, setAutomergeDocumentAtRedis } from '@new
 import { v4 as uuidV4 } from 'uuid'
 import User from '../Domain/User'
 import { getHierarchyCacheKey, getHierarchyChildrenOpenCacheKey } from '@newturn-develop/molink-constants'
+import { convertAutomergeChangesThroughNetwork } from '@newturn-develop/molink-automerge-wrapper'
 
 class SynchronizationService {
     private infoMap = new Map<string, Automerge.FreezeObject<HierarchyChildrenOpenInfoInterface>>()
@@ -65,18 +66,8 @@ class SynchronizationService {
                 continue
             }
             console.log(`client ${client.id}: send hierarchy children open change event`)
-            dependencyClient.socket.emit('change', new AutomergeChangeEventDTO(changeId, changes))
+            dependencyClient.socket.emit('hierarchy-children-open-change', new AutomergeChangeEventDTO(changeId, convertAutomergeChangesThroughNetwork(changes)))
         }
-    }
-
-    public sendChangeToDependencyClients (client: Client, changes: Automerge.BinaryChange[]) {
-        const key = this.getKeyByClient(client)
-        const changeId = uuidV4()
-        const dependencyClients = this.clientsHierarchyDependencyMap.get(key)?.values()
-        if (!dependencyClients) {
-            return
-        }
-
     }
 }
 export default new SynchronizationService()

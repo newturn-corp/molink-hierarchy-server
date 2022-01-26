@@ -29,7 +29,7 @@ export class MainController {
     }
 
     async handleHierarchyChange (dto: AutomergeChangeEventDTO) {
-        await HierarchyService.handleChanges(this.client, getAutomergeChangesThroughNetwork(dto.changes))
+        await HierarchyService.handleChanges(this.client, dto.changeId, getAutomergeChangesThroughNetwork(dto.changes))
     }
 
     async handleHierarchyChildrenOpenChange (dto: AutomergeChangeEventDTO) {

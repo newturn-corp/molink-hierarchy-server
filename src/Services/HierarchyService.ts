@@ -3,16 +3,17 @@ import { Client } from '../Client'
 import { HierarchyChangeTimeout, HierarchyNotExists, InvalidDocumentLocation } from '../Errors/HierarchyError'
 import CacheService from './CacheService'
 import {
-    HierarchyDocumentInfoInterface,
     HierarchyInfoInterface,
-    HierarchyChangeEventDTO,
     AutomergeChangeEventDTO, AutomergeDocumentDTO
 } from '@newturn-develop/types-molink'
 import { getAutomergeDocumentFromRedis, setAutomergeDocumentAtRedis } from '@newturn-develop/molink-utils'
 import User from '../Domain/User'
 import { v4 as uuidV4 } from 'uuid'
 import { getHierarchyCacheKey } from '@newturn-develop/molink-constants'
-import { convertAutomergeDocumentForNetwork } from '@newturn-develop/molink-automerge-wrapper'
+import {
+    convertAutomergeChangesThroughNetwork,
+    convertAutomergeDocumentForNetwork
+} from '@newturn-develop/molink-automerge-wrapper'
 
 class HierarchyService {
     private hierarchyMap = new Map<number, Automerge.FreezeObject<HierarchyInfoInterface>>()
@@ -41,14 +42,14 @@ class HierarchyService {
         console.log(`client ${client.id} deregistered at ${hierarchyUser.nickname}'s hierarchy`)
     }
 
-    public async handleChanges (client: Client, dto: AutomergeChangeEventDTO) {
+    public async handleChanges (client: Client, changeId: string, changes: Automerge.BinaryChange[]) {
         console.log(`handle change from ${client.id}`)
         const hierarchyUser = client.hierarchyUser as User
         const hierarchy = this.hierarchyMap.get(hierarchyUser.id)
         if (!hierarchy) {
             throw new HierarchyNotExists()
         }
-        const [newHierarchy] = Automerge.applyChanges(hierarchy, dto.changes)
+        const [newHierarchy] = Automerge.applyChanges(hierarchy, changes)
         this.hierarchyMap.set(hierarchyUser.id, newHierarchy)
         await setAutomergeDocumentAtRedis(CacheService.redis, getHierarchyCacheKey(hierarchyUser.id), newHierarchy)
 
@@ -62,7 +63,7 @@ class HierarchyService {
                 continue
             }
             console.log(`client ${client.id}: send hierarchy change event`)
-            dependencyClient.socket.emit('change', dto)
+            dependencyClient.socket.emit('hierarchy-change', new AutomergeChangeEventDTO(changeId, convertAutomergeChangesThroughNetwork(changes)))
         }
     }
 
