@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/molink-live-server.iml" filepath="$PROJECT_DIR$/.idea/molink-live-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/molink-hierarchy-server.iml" filepath="$PROJECT_DIR$/.idea/molink-hierarchy-server.iml" />
     </modules>
   </component>
 </project>

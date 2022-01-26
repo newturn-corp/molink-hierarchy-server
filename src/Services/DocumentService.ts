@@ -28,5 +28,19 @@ class DocumentService {
             ...dto
         }
     }
+
+    // async deleteDocument (user: User, dto: DeleteDocumentDto) {
+    //     const document = await DocumentRepo.getDocument(dto.id)
+    //     if (document?.userId !== user.id) {
+    //         throw new DocumentActionForbidden()
+    //     }
+    //     if (user.representative_document_id === document.id) {
+    //         await UserRepo.setUserRepresentativeDocumentId(user.id, null)
+    //     }
+    //     await DocumentRepo.decreaseDocumentsOrder(dto.parentId, dto.order)
+    //     await this.deleteChild(user, dto.id)
+    //     await DocumentRepo.deleteDocument(dto.id)
+    //     await ContentRepo.deleteContent(dto.contentId)
+    // }
 }
 export default new DocumentService()

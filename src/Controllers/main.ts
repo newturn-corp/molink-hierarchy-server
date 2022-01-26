@@ -1,7 +1,13 @@
-import { CreateDocumentDTO, CreateDocumentResponseDTO } from '@newturn-develop/types-molink'
+
 import { Client } from '../Client'
 import DocumentService from '../Services/DocumentService'
 import HierarchyService from '../Services/HierarchyService'
+import { AutomergeChangeEventDTO, AutomergeDocumentDTO } from '@newturn-develop/types-molink'
+import {
+    getAutomergeChangesThroughNetwork,
+    getAutomergeDocumentThroughNetwork
+} from '@newturn-develop/molink-automerge-wrapper'
+import HierarchyChildrenOpenService from '../Services/HierarchyChildrenOpenService'
 
 export class MainController {
     userId: number
@@ -11,15 +17,24 @@ export class MainController {
         this.userId = userId
         this.client = client
 
-        client.socket.on('createDocument', (data: CreateDocumentDTO) => this.handleCreateDocument(data))
+        if (userId === client.hierarchyUser?.id) {
+            client.socket.on('hierarchy-change', (dto: AutomergeChangeEventDTO) => this.handleHierarchyChange(dto))
+            client.socket.on('hierarchy-merge', (dto: AutomergeDocumentDTO) => this.handleMerge(dto))
+        }
+        client.socket.on('hierarchy-children-open-change', (data: AutomergeChangeEventDTO) => this.handleHierarchyChildrenOpenChange(data))
         client.socket.on('disconnect', () => this.handleDisconnect())
     }
 
-    async handleCreateDocument (data: CreateDocumentDTO) {
-        console.log(`Client: ${this.client.id}: Handle Create Document Event ${JSON.stringify(data)}`)
-        const info = await DocumentService.createDocument(this.userId, data)
-        await HierarchyService.handleCreateNewDocument(this.client, info)
-        this.client.socket.emit('create-document-response', new CreateDocumentResponseDTO(info.id))
+    async handleMerge (dto: AutomergeDocumentDTO) {
+        await HierarchyService.handleMerge(this.client, getAutomergeDocumentThroughNetwork(dto.document))
+    }
+
+    async handleHierarchyChange (dto: AutomergeChangeEventDTO) {
+        await HierarchyService.handleChanges(this.client, getAutomergeChangesThroughNetwork(dto.changes))
+    }
+
+    async handleHierarchyChildrenOpenChange (dto: AutomergeChangeEventDTO) {
+        await HierarchyChildrenOpenService.handleChanges(this.client, dto.changeId, getAutomergeChangesThroughNetwork(dto.changes))
     }
 
     async handleDisconnect () {

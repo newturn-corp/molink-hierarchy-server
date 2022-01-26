@@ -11,8 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@newturn-develop/molink-automerge-wrapper": "^0.0.3",
+    "@newturn-develop/molink-constants": "^0.0.2",
     "@newturn-develop/molink-utils": "^0.0.14",
-    "@newturn-develop/types-molink": "^0.0.15",
+    "@newturn-develop/types-molink": "^0.0.27",
     "@slack/web-api": "^6.5.1",
     "@types/lodash": "^4.14.178",
     "automerge": "^1.0.1-preview.6",

@@ -18,10 +18,6 @@ const env = {
     },
     jwt: process.env.JWT_SECRET!,
     redis: {
-        hierarchyLive: {
-            host: process.env.HIERARCHY_LIVE_REDIS_HOST!,
-            port: Number(process.env.HIERARCHY_LIVE_LIVE_REDIS_PORT) || 6379
-        },
         host: process.env.REDIS_HOST!,
         port: Number(process.env.REDIS_PORT) || 6379
     },
