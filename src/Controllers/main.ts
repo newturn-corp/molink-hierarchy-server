@@ -38,6 +38,9 @@ export class MainController {
 
     async handleDisconnect () {
         this.client.socket.leave(this.client.socket.id)
-        HierarchyService.deregisterClient(this.client)
+        await HierarchyChildrenOpenService.deregisterClient(this.client)
+        if (this.client.hierarchyUser?.id === this.userId) {
+            await HierarchyService.deregisterClient(this.client)
+        }
     }
 }

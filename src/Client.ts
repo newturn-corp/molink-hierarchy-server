@@ -7,6 +7,7 @@ import UserRepo from './Repositories/UserRepo'
 import env from './env'
 import { MainController } from './Controllers/main'
 import { JWTUser } from '@newturn-develop/types-molink'
+import HierarchyChildrenOpenService from './Services/HierarchyChildrenOpenService'
 
 export class Client {
     id: string = ''
@@ -38,7 +39,11 @@ export class Client {
         console.log(`user ${this.user.id} connected hierarchy name: ${this.hierarchyUser.nickname}, id: ${this.hierarchyUser.id}`)
 
         this.mainController = new MainController(this.user.id, this)
-        await HierarchyService.registerClient(this)
+
+        await HierarchyChildrenOpenService.registerClient(this)
+        if (this.hierarchyUser.id === this.user.id) {
+            await HierarchyService.registerClient(this)
+        }
     }
 
     async setHierarchyUser () {
