@@ -1,6 +1,5 @@
 
 import { Client } from '../Client'
-import DocumentService from '../Services/DocumentService'
 import HierarchyService from '../Services/HierarchyService'
 import { AutomergeChangeEventDTO, AutomergeDocumentDTO } from '@newturn-develop/types-molink'
 import {
