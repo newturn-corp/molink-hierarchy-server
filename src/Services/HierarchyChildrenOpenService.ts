@@ -22,8 +22,10 @@ class SynchronizationService {
 
     async registerClient (client: Client) {
         const key = this.getKeyByClient(client)
+        const user = client.user as User
+        const hierarchyUser = client.hierarchyUser as User
         if (!this.infoMap.has(key)) {
-            const info = await getAutomergeDocumentFromRedis<HierarchyChildrenOpenInfoInterface>(CacheService.redis, key)
+            const info = await getAutomergeDocumentFromRedis<HierarchyChildrenOpenInfoInterface>(CacheService.redis, getHierarchyChildrenOpenCacheKey(hierarchyUser.id, user.id))
             if (!info) {
                 throw new HierarchyNotExists()
             }
