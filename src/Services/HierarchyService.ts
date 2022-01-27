@@ -84,9 +84,6 @@ class HierarchyService {
         }
 
         for (const dependencyClient of dependencyClients) {
-            if (client.id === dependencyClient.id) {
-                continue
-            }
             console.log(`client ${client.id}: send hierarchy merge event`)
             dependencyClient.socket.emit('hierarchy-merge', new AutomergeDocumentDTO(convertAutomergeDocumentForNetwork(mergedHierarchy)))
         }
