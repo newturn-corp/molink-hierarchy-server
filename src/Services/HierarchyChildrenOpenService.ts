@@ -7,9 +7,8 @@ import {
     AutomergeChangeEventDTO
 } from '@newturn-develop/types-molink'
 import { getAutomergeDocumentFromRedis, setAutomergeDocumentAtRedis } from '@newturn-develop/molink-utils'
-import { v4 as uuidV4 } from 'uuid'
 import User from '../Domain/User'
-import { getHierarchyCacheKey, getHierarchyChildrenOpenCacheKey } from '@newturn-develop/molink-constants'
+import { getHierarchyChildrenOpenCacheKey } from '@newturn-develop/molink-constants'
 import { convertAutomergeChangesThroughNetwork } from '@newturn-develop/molink-automerge-wrapper'
 
 class SynchronizationService {
