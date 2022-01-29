@@ -39,7 +39,7 @@ export class MainController {
     }
 
     async handleCreateDocument (dto: CreateDocumentDTO) {
-        await ContentService.createDocument(dto)
+        await ContentService.createDocument(this.userId, dto)
         this.client.socket.emit('create-document-handled')
     }
 

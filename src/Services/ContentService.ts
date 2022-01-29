@@ -4,8 +4,9 @@ import CacheService from './CacheService'
 import Automerge from 'automerge'
 
 class ContentService {
-    async createDocument (dto: CreateDocumentDTO) {
+    async createDocument (userId: number, dto: CreateDocumentDTO) {
         const document = Automerge.from({
+            userId,
             children: [{
                 type: 'title',
                 children: [{ text: '' }]
