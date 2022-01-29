@@ -8,7 +8,6 @@ import {
 } from '@newturn-develop/types-molink'
 import { getAutomergeDocumentFromRedis, setAutomergeDocumentAtRedis } from '@newturn-develop/molink-utils'
 import User from '../Domain/User'
-import { v4 as uuidV4 } from 'uuid'
 import { getHierarchyCacheKey } from '@newturn-develop/molink-constants'
 import {
     convertAutomergeChangesThroughNetwork,
