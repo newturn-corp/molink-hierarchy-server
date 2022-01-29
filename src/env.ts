@@ -5,10 +5,6 @@ const env = {
     isDevelopment: process.env.NODE_ENV === 'development',
     isProduction: !(process.env.NODE_ENV === 'development'),
     port: Number(process.env.PORT) || 7979,
-    opensearch: {
-        domain: process.env.OPENSEARCH_DOMAIN!,
-        region: process.env.OPENSEARCH_REGION!
-    },
     mysql: {
         host: process.env.MYSQL_DB_HOST!,
         port: Number(process.env.MYSQL_DB_PORT) || 3306,
@@ -19,7 +15,11 @@ const env = {
     jwt: process.env.JWT_SECRET!,
     redis: {
         host: process.env.REDIS_HOST!,
-        port: Number(process.env.REDIS_PORT) || 6379
+        port: Number(process.env.REDIS_PORT) || 6379,
+        content: {
+            host: process.env.CONTENT_REDIS_HOST!,
+            port: Number(process.env.CONTENT_REDIS_HOST) || 6379
+        }
     },
     aws: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,

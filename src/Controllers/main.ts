@@ -1,12 +1,13 @@
 
 import { Client } from '../Client'
 import HierarchyService from '../Services/HierarchyService'
-import { AutomergeChangeEventDTO, AutomergeDocumentDTO } from '@newturn-develop/types-molink'
+import { AutomergeChangeEventDTO, AutomergeDocumentDTO, CreateDocumentDTO } from '@newturn-develop/types-molink'
 import {
     getAutomergeChangesThroughNetwork,
     getAutomergeDocumentThroughNetwork
 } from '@newturn-develop/molink-automerge-wrapper'
 import HierarchyChildrenOpenService from '../Services/HierarchyChildrenOpenService'
+import ContentService from '../Services/ContentService'
 
 export class MainController {
     userId: number
@@ -19,6 +20,7 @@ export class MainController {
         if (userId === client.hierarchyUser?.id) {
             client.socket.on('hierarchy-change', (dto: AutomergeChangeEventDTO) => this.handleHierarchyChange(dto))
             client.socket.on('hierarchy-merge', (dto: AutomergeDocumentDTO) => this.handleMerge(dto))
+            client.socket.on('create-document', (dto: CreateDocumentDTO) => this.handleCreateDocument(dto))
         }
         client.socket.on('hierarchy-children-open-change', (data: AutomergeChangeEventDTO) => this.handleHierarchyChildrenOpenChange(data))
         client.socket.on('disconnect', () => this.handleDisconnect())
@@ -34,6 +36,11 @@ export class MainController {
 
     async handleHierarchyChildrenOpenChange (dto: AutomergeChangeEventDTO) {
         await HierarchyChildrenOpenService.handleChanges(this.client, dto.changeId, getAutomergeChangesThroughNetwork(dto.changes))
+    }
+
+    async handleCreateDocument (dto: CreateDocumentDTO) {
+        await ContentService.createDocument(dto)
+        this.client.socket.emit('create-document-handled')
     }
 
     async handleDisconnect () {

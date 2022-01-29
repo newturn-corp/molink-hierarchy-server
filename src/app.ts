@@ -1,10 +1,9 @@
 import env from './env'
-import { OpenSearch, Slack } from '@newturn-develop/molink-utils'
+import { Slack } from '@newturn-develop/molink-utils'
 import express from 'express'
 import { SocketServer } from './SocketServer'
 import cors from 'cors'
 
-OpenSearch.init(env.opensearch.domain, env.opensearch.region)
 Slack.init(env.slack.token)
 
 const app = express()
