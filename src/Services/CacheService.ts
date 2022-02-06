@@ -1,15 +1,13 @@
 import env from '../env'
-import { RedisConnector } from '@newturn-develop/molink-utils'
+import Redis from 'ioredis'
 
 class CacheService {
-    redis: RedisConnector
-    contentRedis: RedisConnector
+    publisher: any
+    subscriber: any
 
     constructor () {
-        this.redis = new RedisConnector(env.redis.host, env.redis.port)
-        this.redis.connect()
-        this.contentRedis = new RedisConnector(env.redis.content.host, env.redis.content.port)
-        this.contentRedis.connect()
+        this.publisher = new Redis(env.redis)
+        this.subscriber = new Redis(env.redis)
     }
 }
 export default new CacheService()

@@ -1,53 +1,57 @@
-
 import { Client } from '../Client'
-import HierarchyService from '../Services/HierarchyService'
-import { AutomergeChangeEventDTO, AutomergeDocumentDTO, CreateDocumentDTO } from '@newturn-develop/types-molink'
-import {
-    getAutomergeChangesThroughNetwork,
-    getAutomergeDocumentThroughNetwork
-} from '@newturn-develop/molink-automerge-wrapper'
-import HierarchyChildrenOpenService from '../Services/HierarchyChildrenOpenService'
-import ContentService from '../Services/ContentService'
+import * as encoding from 'lib0/encoding'
+import * as decoding from 'lib0/decoding'
+import { MessageType } from '../Enum'
+import { Data as WSData } from 'ws'
+import * as awarenessProtocol from 'y-protocols/awareness'
+import * as syncProtocol from 'y-protocols/sync'
+import CacheService from '../Services/CacheService'
+import { SharedDocument } from '../Domain/SharedDocument'
 
 export class MainController {
-    userId: number
     client: Client
 
-    constructor (userId: number, client: Client) {
-        this.userId = userId
+    constructor (client: Client) {
         this.client = client
+        this.client.socket.on('message', (message: WSData) => {
+            this.handleMessage(new Uint8Array(message as ArrayBuffer))
+        })
 
-        if (userId === client.hierarchyUser?.id) {
-            client.socket.on('hierarchy-change', (dto: AutomergeChangeEventDTO) => this.handleHierarchyChange(dto))
-            client.socket.on('hierarchy-merge', (dto: AutomergeDocumentDTO) => this.handleMerge(dto))
-            client.socket.on('create-document', (dto: CreateDocumentDTO) => this.handleCreateDocument(dto))
+        this.client.socket.on('close', () => {
+            this.client.document?.closeWebSocket(this.client.socket)
+            if (this.client.pingInterval) {
+                clearInterval(this.client.pingInterval)
+            }
+        })
+
+        this.client.socket.on('pong', () => {
+            this.client.pongReceived = true
+        })
+    }
+
+    handleMessage (message: Uint8Array) {
+        const encoder = encoding.createEncoder()
+        const decoder = decoding.createDecoder(message)
+        const messageType = decoding.readVarUint(decoder) as MessageType
+        const document = this.client.document as SharedDocument
+        switch (messageType) {
+        case MessageType.MessageSync: {
+            encoding.writeVarUint(encoder, MessageType.MessageSync)
+            syncProtocol.readSyncMessage(decoder, encoder, document, this.client.socket)
+
+            if (encoding.length(encoder) > 1) {
+                document.send(this.client.socket, encoding.toUint8Array(encoder))
+            }
+
+            break
         }
-        client.socket.on('hierarchy-children-open-change', (data: AutomergeChangeEventDTO) => this.handleHierarchyChildrenOpenChange(data))
-        client.socket.on('disconnect', () => this.handleDisconnect())
-    }
-
-    async handleMerge (dto: AutomergeDocumentDTO) {
-        await HierarchyService.handleMerge(this.client, getAutomergeDocumentThroughNetwork(dto.document))
-    }
-
-    async handleHierarchyChange (dto: AutomergeChangeEventDTO) {
-        await HierarchyService.handleChanges(this.client, dto.changeId, getAutomergeChangesThroughNetwork(dto.changes))
-    }
-
-    async handleHierarchyChildrenOpenChange (dto: AutomergeChangeEventDTO) {
-        await HierarchyChildrenOpenService.handleChanges(this.client, dto.changeId, getAutomergeChangesThroughNetwork(dto.changes))
-    }
-
-    async handleCreateDocument (dto: CreateDocumentDTO) {
-        await ContentService.createDocument(this.userId, dto)
-        this.client.socket.emit('create-document-handled')
-    }
-
-    async handleDisconnect () {
-        this.client.socket.leave(this.client.socket.id)
-        await HierarchyChildrenOpenService.deregisterClient(this.client)
-        if (this.client.hierarchyUser?.id === this.userId) {
-            await HierarchyService.deregisterClient(this.client)
+        case MessageType.MessageAwareness: {
+            const update = decoding.readVarUint8Array(decoder)
+            CacheService.publisher.publishBuffer(document.awarenessChannel, Buffer.from(update))
+            awarenessProtocol.applyAwarenessUpdate(document.awareness, update, this.client.socket)
+            break
+        }
+        default: throw new Error('unreachable')
         }
     }
 }
