@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "install node packages"
-cd /home/ubuntu/molink-hierarchy-live
+cd /home/ubuntu/hierarchy
 # required packages
 npm install dotenv aws-sdk ip moment-timezone
 # production packages

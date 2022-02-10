@@ -22,6 +22,7 @@ module.exports = {
         camelcase: 'off'
     },
     globals: {
-        Express: true
+        Express: true,
+        NodeJS: true
     }
 }

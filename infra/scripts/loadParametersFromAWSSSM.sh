@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /home/ubuntu/molink-hierarchy-live
+cd /home/ubuntu/hierarchy
 node infra/scripts/loadParametersFromAWSSSM.js

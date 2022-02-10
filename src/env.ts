@@ -5,10 +5,7 @@ const env = {
     isDevelopment: process.env.NODE_ENV === 'development',
     isProduction: !(process.env.NODE_ENV === 'development'),
     port: Number(process.env.PORT) || 7979,
-    opensearch: {
-        domain: process.env.OPENSEARCH_DOMAIN!,
-        region: process.env.OPENSEARCH_REGION!
-    },
+    host: process.env.HOST! || 'localhost',
     mysql: {
         host: process.env.MYSQL_DB_HOST!,
         port: Number(process.env.MYSQL_DB_PORT) || 3306,
@@ -16,23 +13,20 @@ const env = {
         password: process.env.MYSQL_DB_PASSWORD!,
         database: process.env.MYSQL_DB_NAME!
     },
-    jwt: process.env.JWT_SECRET!,
+    postgre: {
+        host: process.env.POSTGRE_DB_HOST!,
+        user: process.env.POSTGRE_DB_USER!,
+        password: process.env.POSTGRE_DB_PASSWORD!,
+        name: process.env.POSTGRE_DB_NAME!
+    },
     redis: {
-        hierarchyLive: {
-            host: process.env.HIERARCHY_LIVE_REDIS_HOST!,
-            port: Number(process.env.HIERARCHY_LIVE_LIVE_REDIS_PORT) || 6379
-        },
         host: process.env.REDIS_HOST!,
         port: Number(process.env.REDIS_PORT) || 6379
     },
-    aws: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-        region: process.env.AWS_REGION!
-    },
     slack: {
         token: process.env.SLACK_BOT_TOKEN!
-    }
+    },
+    jwt: process.env.JWT_SECRET!
 }
 
 const validateEnv = (data: Record<string, unknown> | null) => {

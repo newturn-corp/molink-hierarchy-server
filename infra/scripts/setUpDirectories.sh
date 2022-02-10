@@ -14,12 +14,12 @@ cd /home/ubuntu
 checkThenCreateDir log
 
 # clean up old source code
-if [ -d molink-hierarchy-live ]
+if [ -d hierarchy ]
 then
-    echo "clean up: molink-hierarchy-live"
-    rm -r molink-hierarchy-live
-    mkdir molink-hierarchy-live
+    echo "clean up: hierarchy"
+    rm -r hierarchy
+    mkdir hierarchy
 else
-    echo "create dir: molink-hierarchy-live"
-    mkdir molink-hierarchy-live
+    echo "create dir: hierarchy"
+    mkdir hierarchy
 fi

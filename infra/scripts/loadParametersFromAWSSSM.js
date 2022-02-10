@@ -1,13 +1,13 @@
 #!/usr/bin/node
 const fs = require('fs')
 // eslint-disable-next-line import/no-absolute-path
-const AWS = require('/home/ubuntu/molink-hierarchy-live/node_modules/aws-sdk')
+const AWS = require('/home/ubuntu/hierarchy/node_modules/aws-sdk')
 AWS.config.update({ region: 'ap-northeast-2' })
 const ssm = new AWS.SSM()
 
 async function loadEnvParameters (envParams, token) {
     const params = {
-        Path: `/molink-hierarchy-live/${process.env.DEPLOYMENT_GROUP_NAME}/`,
+        Path: `/hierarchy/${process.env.DEPLOYMENT_GROUP_NAME}/`,
         Recursive: true,
         WithDecryption: true,
         NextToken: token
@@ -28,7 +28,7 @@ async function loadEnvParameters (envParams, token) {
 async function createDotEnv () {
     const envParams = await loadEnvParameters([], null)
     const envString = envParams.sort().join('\n')
-    fs.writeFileSync('/home/ubuntu/molink-hierarchy-live/.env', envString)
+    fs.writeFileSync('/home/ubuntu/hierarchy/.env', envString)
 }
 
 createDotEnv()
