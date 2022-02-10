@@ -21,8 +21,7 @@ const env = {
     },
     redis: {
         host: process.env.REDIS_HOST!,
-        port: Number(process.env.REDIS_PORT) || 6379,
-        keyPrefix: process.env.REDIS_PREFIX as string
+        port: Number(process.env.REDIS_PORT) || 6379
     },
     slack: {
         token: process.env.SLACK_BOT_TOKEN!
