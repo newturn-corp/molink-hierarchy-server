@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Build Ts Package"
-cd /home/ubuntu/molink-hierarchy-live
+cd /home/ubuntu/hierarchy
 # production packages
 rm -r build
 

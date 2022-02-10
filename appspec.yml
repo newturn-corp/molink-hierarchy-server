@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ubuntu/molink-hierarchy-live
+    destination: /home/ubuntu/hierarchy
 permissions:
-  - object: /home/ubuntu/molink-hierarchy-live
+  - object: /home/ubuntu/hierarchy
     owner: ubuntu
 hooks:
   ApplicationStop:

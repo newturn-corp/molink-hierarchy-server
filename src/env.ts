@@ -5,7 +5,7 @@ const env = {
     isDevelopment: process.env.NODE_ENV === 'development',
     isProduction: !(process.env.NODE_ENV === 'development'),
     port: Number(process.env.PORT) || 7979,
-    host: 'localhost',
+    host: process.env.HOST! || 'localhost',
     mysql: {
         host: process.env.MYSQL_DB_HOST!,
         port: Number(process.env.MYSQL_DB_PORT) || 3306,
@@ -24,16 +24,8 @@ const env = {
         port: Number(process.env.REDIS_PORT) || 6379,
         keyPrefix: process.env.REDIS_PREFIX as string
     },
-    aws: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-        region: process.env.AWS_REGION!
-    },
     slack: {
         token: process.env.SLACK_BOT_TOKEN!
-    },
-    secret: {
-        cookie: process.env.COOKIE_SECRET!
     },
     jwt: process.env.JWT_SECRET!
 }

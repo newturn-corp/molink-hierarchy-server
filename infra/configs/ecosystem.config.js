@@ -1,6 +1,6 @@
 module.exports = {
     apps: [{
-        name: 'molink-hierarchy-live',
+        name: 'hierarchy',
         script: 'build/app.js',
         node_args: '--max_old_space_size=1024',
         error_file: '/home/ubuntu/log/error.log',
