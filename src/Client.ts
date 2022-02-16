@@ -27,7 +27,7 @@ export class Client {
     }
 
     async init () {
-        const { document, isNew } = SynchronizationService.getHierarchy(this.userId)
+        const { document, isNew } = SynchronizationService.getUserInfo(this.userId)
         this.document = document
         document.socketMap.set(this.socket, new Set())
 
