@@ -19,7 +19,7 @@ export class SocketServer {
 
     start () {
         this.server.on('connection', async (socket, request) => {
-            this.handleConnect(socket, request)
+            await this.handleConnect(socket, request)
             // await setupWSConnection(ws, req);
         })
         this.httpServer.on('upgrade', (req, socket, head) => {
