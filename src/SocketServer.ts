@@ -5,34 +5,42 @@ import { Client } from './Client'
 import env from './env'
 import { parseCookie } from '@newturn-develop/molink-utils'
 import jwt from 'jsonwebtoken'
+import { JWTUser } from '@newturn-develop/types-molink'
+import UserRepo from './Repositories/UserRepo'
+import moment from 'moment-timezone'
 
-export class SocketServer {
+class SocketServer {
     nodeId: string
-    httpServer: http.Server
-    server: WebSocketServer
+    httpServer: http.Server | null = null
+    server: WebSocketServer | null = null
+    clientMap: Map<string, Client> = new Map<string, Client>()
 
-    constructor (httpServer: http.Server) {
+    constructor () {
         this.nodeId = uuidV4()
-        this.server = new WebSocketServer({ noServer: true })
-        this.httpServer = httpServer
     }
 
-    start () {
+    start (httpServer: http.Server) {
+        this.server = new WebSocketServer({ noServer: true })
+        this.httpServer = httpServer
         this.server.on('connection', async (socket, request) => {
-            this.handleConnect(socket, request)
-            // await setupWSConnection(ws, req);
+            console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] upgrade ${request.headers['user-agent']}`)
+            await this.handleConnect(socket, request)
         })
         this.httpServer.on('upgrade', (req, socket, head) => {
-            if (!this.authUser(req)) {
+            console.log(`${req.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] upgrade ${req.headers['user-agent']}`)
+            const id = this.authUser(req)
+            if (!id) {
+                console.log(`${req.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] auth fail ${req.headers['user-agent']}`)
                 return
             }
 
-            this.server.handleUpgrade(req, socket, head, (ws) => {
-                this.server.emit('connection', ws, req)
+            this.server?.handleUpgrade(req, socket, head, (ws) => {
+                req.headers.userId = id.toString()
+                this.server?.emit('connection', ws, req)
             })
         })
-        this.httpServer.listen(env.port, env.host, () => {
-            console.log(`molink-content server start at ${env.port}`)
+        this.httpServer?.listen(env.port, env.host, () => {
+            console.log(`hierarchy server start at ${env.port}`)
         })
     }
 
@@ -46,8 +54,8 @@ export class SocketServer {
             return false
         }
         try {
-            jwt.verify(token, env.jwt)
-            return true
+            const payload = jwt.verify(token, env.jwt) as JWTUser
+            return payload.id
         } catch (e) {
             return false
         }
@@ -56,6 +64,10 @@ export class SocketServer {
     async handleConnect (socket: WebSocket, request: http.IncomingMessage) {
         const client = new Client(socket, request)
         await client.init()
-        console.log(client.id + ' connected')
+        this.clientMap.set(client.id, client)
+        const userId = Number(request.headers.userId)
+        const user = await UserRepo.getActiveUserById(userId)
+        console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} connect ${user?.id} ${user?.nickname} ${request.headers['user-agent']}`)
     }
 }
+export default new SocketServer()

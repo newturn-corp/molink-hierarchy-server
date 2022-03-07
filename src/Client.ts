@@ -27,9 +27,10 @@ export class Client {
     }
 
     async init () {
-        const { document, isNew } = SynchronizationService.getUserInfo(this.userId)
+        const { document, isNew } = SynchronizationService.getHierarchy(this.userId)
         this.document = document
         document.socketMap.set(this.socket, new Set())
+        this.controller = new MainController(this)
 
         if (isNew) {
             // 특정 Document에 대한 저장된 Update를 싹 다 가져옴
@@ -62,7 +63,6 @@ export class Client {
                 }
             }
         }, 30000)
-        this.controller = new MainController(this)
         {
             // send sync step 1
             const encoder = encoding.createEncoder()

@@ -1,9 +1,10 @@
 import express from 'express'
 import http from 'http'
-import { SocketServer } from './SocketServer'
+import SocketServer from './SocketServer'
+import { useMiddleware } from './Configs/MiddlewareConfig'
+import 'reflect-metadata'
 
 const app = express()
-    .get('/health-check', (req, res) => res.status(200).end())
+useMiddleware(app)
 const server = http.createServer(app)
-const socketServer = new SocketServer(server)
-socketServer.start()
+SocketServer.start(server)

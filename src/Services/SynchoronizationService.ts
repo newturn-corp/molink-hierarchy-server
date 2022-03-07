@@ -1,10 +1,10 @@
 import { SharedDocument } from '../Domain/SharedDocument'
 
 class SynchronizationService {
-    private userInfoMap = new Map<number, SharedDocument>()
+    private hierarchyMap = new Map<number, SharedDocument>()
 
-    getUserInfo (userId: number) {
-        const existing = this.userInfoMap.get(userId)
+    getHierarchy (userId: number) {
+        const existing = this.hierarchyMap.get(userId)
         if (existing) {
             return {
                 document: existing,
@@ -14,15 +14,15 @@ class SynchronizationService {
 
         const document = new SharedDocument(userId)
         document.gc = true
-        this.userInfoMap.set(userId, document)
+        this.hierarchyMap.set(userId, document)
         return {
             document,
             isNew: true
         }
     }
 
-    deleteUserInfo (userId: number) {
-        this.userInfoMap.delete(userId)
+    deleteHierarchy (userId: number) {
+        this.hierarchyMap.delete(userId)
     }
 }
 export default new SynchronizationService()

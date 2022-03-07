@@ -110,7 +110,7 @@ export class SharedDocument extends Y.Doc {
 
             if (this.socketMap.size === 0) {
                 this.destroy()
-                SynchronizationService.deleteUserInfo(this.id)
+                SynchronizationService.deleteHierarchy(this.id)
             }
         }
 
