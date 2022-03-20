@@ -33,7 +33,7 @@ class SynchronizationService {
         let maxUserID = null
         for (const document of documents) {
             documentCount += 1
-            const documentUserCount = Array(document.socketMap.values()).length
+            const documentUserCount = [...document.socketMap.values()].length
             totalUserCount += documentUserCount
             if (documentUserCount > maxUserCount) {
                 maxUserCount = documentUserCount
