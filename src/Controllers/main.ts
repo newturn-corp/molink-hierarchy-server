@@ -7,6 +7,7 @@ import * as awarenessProtocol from 'y-protocols/awareness'
 import * as syncProtocol from 'y-protocols/sync'
 import CacheService from '../Services/CacheService'
 import { SharedDocument } from '../Domain/SharedDocument'
+import moment from 'moment-timezone'
 
 export class MainController {
     client: Client
@@ -14,10 +15,12 @@ export class MainController {
     constructor (client: Client) {
         this.client = client
         this.client.socket.on('message', (message: WSData) => {
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} message ${this.client.userId}`)
             this.handleMessage(new Uint8Array(message as ArrayBuffer))
         })
 
         this.client.socket.on('close', () => {
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} close ${this.client.userId}`)
             this.client.document?.closeWebSocket(this.client.socket)
             if (this.client.pingInterval) {
                 clearInterval(this.client.pingInterval)
