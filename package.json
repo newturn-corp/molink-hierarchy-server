@@ -13,8 +13,8 @@
   "dependencies": {
     "@newturn-develop/molink-automerge-wrapper": "^0.0.6",
     "@newturn-develop/molink-constants": "^0.0.2",
-    "@newturn-develop/molink-utils": "^0.0.30",
-    "@newturn-develop/types-molink": "^0.0.35",
+    "@newturn-develop/molink-utils": "^0.0.32",
+    "@newturn-develop/types-molink": "^0.0.56",
     "@slack/web-api": "^6.5.1",
     "@types/lodash": "^4.14.178",
     "cookie-parser": "^1.4.6",
@@ -33,6 +33,7 @@
     "node-schedule": "^2.1.0",
     "pg": "^8.7.3",
     "routing-controllers": "^0.9.0",
+    "socket.io": "^4.4.1",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.5.4",
     "uuid": "^8.3.2",
