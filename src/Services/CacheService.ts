@@ -10,7 +10,7 @@ class CacheService {
     constructor () {
         this.publisher = new Redis(env.redis)
         this.subscriber = new Redis(env.redis)
-        this.main = new RedisConnector(env.redis.host, env.redis.port)
+        this.main = new RedisConnector(env.redis.host, env.redis.port, 'hierarchy-redis', true)
         this.main.connect()
     }
 }
