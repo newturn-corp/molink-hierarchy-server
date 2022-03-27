@@ -23,7 +23,7 @@ class PageVisibilityService {
         try {
             const yMap = document.getMap('documentHierarchyInfoMap')
             const map = yMap.toJSON()
-            const page = map.get(pageId) as HierarchyDocumentInfoInterface
+            const page = map[pageId] as HierarchyDocumentInfoInterface
             if (!page) {
                 throw new PageNotExists()
             }
