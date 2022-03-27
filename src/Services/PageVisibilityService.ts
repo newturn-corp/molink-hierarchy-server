@@ -5,6 +5,7 @@ import HierarchyRepo from '../Repositories/HierarchyRepo'
 import * as Y from 'yjs'
 import { ChildrenVisibilityWide, PageNotExists, ParentVisibilityNarrow } from '../Errors/HierarchyError'
 import { checkVisibilityWide, getChildren, getParents } from '@newturn-develop/molink-utils'
+import CacheService from './CacheService'
 
 class PageVisibilityService {
     async changePageVisibility (user: User, dto: ChangePageVisibilityDTO) {
@@ -44,6 +45,7 @@ class PageVisibilityService {
                         for (const parentID of narrowParentIDList) {
                             const parent = map[parentID]
                             parent.visibility = visibility
+                            this._savePageStatusInRedis(parent)
                             yMap.set(parent.id, parent)
                         }
                     }
@@ -65,11 +67,13 @@ class PageVisibilityService {
                         for (const childID of wideChildrenIDList) {
                             const child = map[childID]
                             child.visibility = visibility
+                            this._savePageStatusInRedis(child)
                             yMap.set(child.id, child)
                         }
                     }
                 }
                 page.visibility = visibility
+                this._savePageStatusInRedis(page)
                 yMap.set(page.id, page)
             }, 'server')
             if (document.destoryable) {
@@ -81,6 +85,11 @@ class PageVisibilityService {
             }
             throw err
         }
+    }
+
+    private async _savePageStatusInRedis (page: HierarchyDocumentInfoInterface) {
+        console.log(`save page status in redis page-${page.id}`)
+        await CacheService.main.setWithEx(`page-${page.id}`, JSON.stringify(page), 1800)
     }
 }
 export default new PageVisibilityService()
