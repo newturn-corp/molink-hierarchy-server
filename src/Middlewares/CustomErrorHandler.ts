@@ -77,14 +77,14 @@ export class CustomErrorHandler implements ExpressErrorMiddlewareInterface {
                     msg: '해당 엔드포인트에 접근할 수 있는 권한이 없습니다'
                 }
             } else {
+                if (env.isProduction) {
+                    Slack.sendTextMessage(JSON.stringify(error), 'C02SE9VA8TC')
+                } else {
+                    Slack.sendTextMessage(JSON.stringify(error), 'C02TWKQHJ64')
+                }
                 errorObject = {
                     status: 500001,
                     msg: '알 수 없는 오류가 발생했습니다'
-                }
-                if (env.isProduction) {
-                    Slack.sendTextMessage(JSON.stringify(errorObject), 'C02SE9VA8TC')
-                } else {
-                    Slack.sendTextMessage(JSON.stringify(errorObject), 'C02TWKQHJ64')
                 }
             }
             return res.json(errorObject)

@@ -43,11 +43,15 @@ export class SharedDocument extends Y.Doc {
         })
     }
 
+    get destoryable () {
+        return this.socketMap.size === 0
+    }
+
     private async handleUpdate (update: Uint8Array, origin: any, document: SharedDocument) {
         let shouldPersist = false
 
         // 웹소켓에서 온 update이면서 socketMap에 저장되어 있으면 persist
-        if (origin instanceof WebSocket && document.socketMap.has(origin)) {
+        if (origin === 'server' || (origin instanceof WebSocket && document.socketMap.has(origin))) {
             CacheService.publisher.publishBuffer(document.id, Buffer.from(update)) // do not await
             shouldPersist = true
         }
@@ -107,9 +111,8 @@ export class SharedDocument extends Y.Doc {
             this.socketMap.delete(socket)
             awarenessProtocol.removeAwarenessStates(this.awareness, Array.from(controlledIds), null)
 
-            if (this.socketMap.size === 0) {
+            if (this.destoryable) {
                 this.destroy()
-                SynchronizationService.deleteHierarchy(this.id)
             }
         }
 
@@ -118,6 +121,7 @@ export class SharedDocument extends Y.Doc {
 
     destroy () {
         super.destroy()
+        SynchronizationService.deleteHierarchy(this.id)
         CacheService.subscriber.unsubscribe(this.id)
     }
 }

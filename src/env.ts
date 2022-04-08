@@ -26,7 +26,11 @@ const env = {
     slack: {
         token: process.env.SLACK_BOT_TOKEN!
     },
-    jwt: process.env.JWT_SECRET!
+    secret: {
+        cookie: process.env.COOKIE_SECRET!
+    },
+    jwt: process.env.JWT_SECRET!,
+    allow_origin_list: process.env.ALLOW_ORIGIN_LIST!
 }
 
 const validateEnv = (data: Record<string, unknown> | null) => {
