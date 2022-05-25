@@ -30,7 +30,10 @@ const env = {
         cookie: process.env.COOKIE_SECRET!
     },
     jwt: process.env.JWT_SECRET!,
-    allow_origin_list: process.env.ALLOW_ORIGIN_LIST!
+    allow_origin_list: process.env.ALLOW_ORIGIN_LIST!,
+    api: {
+        url: process.env.API_SERVER_BASE_URL!
+    }
 }
 
 const validateEnv = (data: Record<string, unknown> | null) => {
