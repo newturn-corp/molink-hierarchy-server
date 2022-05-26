@@ -3,11 +3,12 @@ import http from 'http'
 import SocketServer from './SocketServer'
 import { useMiddleware } from './Configs/MiddlewareConfig'
 import 'reflect-metadata'
-import { Slack } from '@newturn-develop/molink-utils'
+import { OpenSearch, Slack } from '@newturn-develop/molink-utils'
 import env from './env'
 import { startCron } from './cron'
 
 Slack.init(env.slack.token)
+OpenSearch.init(env.opensearch.domain, env.opensearch.region)
 
 const app = express()
 useMiddleware(app)
