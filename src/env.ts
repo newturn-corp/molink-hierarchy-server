@@ -33,6 +33,10 @@ const env = {
     allow_origin_list: process.env.ALLOW_ORIGIN_LIST!,
     api: {
         url: process.env.API_SERVER_BASE_URL!
+    },
+    opensearch: {
+        domain: process.env.OPENSEARCH_DOMAIN!,
+        region: process.env.OPENSEARCH_REGION!
     }
 }
 

@@ -6,12 +6,14 @@ import * as Y from 'yjs'
 import { ChildrenVisibilityWide, PageNotExists, ParentVisibilityNarrow } from '../Errors/HierarchyError'
 import { checkVisibilityWide, getChildren, getParents } from '@newturn-develop/molink-utils'
 import CacheService from './CacheService'
+import ESPageRepo from '../Repositories/ESPageRepo'
 
 class PageVisibilityService {
     async changePageVisibility (user: User, dto: ChangePageVisibilityDTO) {
         const { pageId, visibility, force } = dto
         const userId = user.id
         const { document, isNew } = SynchronizationService.getHierarchy(userId)
+        const targetPages: string[] = []
         if (isNew) {
             let hierarchy = await HierarchyRepo.getHierarchy(userId)
             if (!hierarchy) {
@@ -45,6 +47,7 @@ class PageVisibilityService {
                         for (const parentID of narrowParentIDList) {
                             const parent = map[parentID]
                             parent.visibility = visibility
+                            targetPages.push(parent.id)
                             this._savePageStatusInRedis(parent)
                             yMap.set(parent.id, parent)
                         }
@@ -67,15 +70,18 @@ class PageVisibilityService {
                         for (const childID of wideChildrenIDList) {
                             const child = map[childID]
                             child.visibility = visibility
+                            targetPages.push(child.id)
                             this._savePageStatusInRedis(child)
                             yMap.set(child.id, child)
                         }
                     }
                 }
                 page.visibility = visibility
+                targetPages.push(page.id)
                 this._savePageStatusInRedis(page)
                 yMap.set(page.id, page)
             }, 'server')
+            await ESPageRepo.setPagesVisibility(targetPages, visibility)
             if (document.destoryable) {
                 document.destroy()
             }
