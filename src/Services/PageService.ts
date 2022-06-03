@@ -45,7 +45,7 @@ export class PageService {
                 for (const [index, pageId] of yTopLevelDocumentIdList.toArray().entries()) {
                     const page = yMap.get(pageId as string) as HierarchyDocumentInfoInterface
                     page.order = index
-                    yMap.set(pageId as string, document)
+                    yMap.set(pageId as string, page)
                 }
             } else {
                 const parent = yMap.get(parentId) as HierarchyDocumentInfoInterface
@@ -53,7 +53,7 @@ export class PageService {
                 for (const [index, pageId] of parent.children.entries()) {
                     const page = yMap.get(pageId) as HierarchyDocumentInfoInterface
                     page.order = index
-                    yMap.set(pageId, document)
+                    yMap.set(pageId, page)
                 }
                 parent.childrenOpen = true
                 yMap.set(parentId, parent)
