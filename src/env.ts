@@ -32,7 +32,8 @@ const env = {
     jwt: process.env.JWT_SECRET!,
     allow_origin_list: process.env.ALLOW_ORIGIN_LIST!,
     api: {
-        url: process.env.API_SERVER_BASE_URL!
+        url: process.env.API_SERVER_BASE_URL!,
+        internalKey: process.env.INTERNAL_API_KEY!
     },
     opensearch: {
         domain: process.env.OPENSEARCH_DOMAIN!,

@@ -10,7 +10,7 @@ import { PageService } from '../Services/PageService'
 export class PageController {
     @Post('/')
     @Authorized()
-    async changePageVisibility (@CurrentUser() user: User, @Body() dto: CreatePageInBlogDTO) {
+    async createPage (@CurrentUser() user: User, @Body() dto: CreatePageInBlogDTO) {
         const service = new PageService()
         const responseDTO = await service.createPage(user.id, dto)
         return makeResponseMessage(201, responseDTO)
