@@ -1,4 +1,9 @@
-import { CreatePageInBlogDTO, HierarchyDocumentInfoInterface, PageVisibility } from '@newturn-develop/types-molink'
+import {
+    CreatePageInBlogDTO,
+    HierarchyDocumentInfoInterface,
+    PageVisibility, UpdatePageTitleDTO,
+    User
+} from '@newturn-develop/types-molink'
 import CacheService from './CacheService'
 import SynchronizationService from './SynchoronizationService'
 import HierarchyRepo from '../Repositories/HierarchyRepo'

@@ -1,4 +1,7 @@
 import { SharedDocument } from '../Domain/SharedDocument'
+import * as Y from 'yjs'
+import { BlogNotExists } from '../Errors/HierarchyError'
+import HierarchyRepo from '../Repositories/HierarchyRepo'
 
 class SynchronizationService {
     private hierarchyMap = new Map<number, SharedDocument>()
@@ -19,6 +22,21 @@ class SynchronizationService {
             document,
             isNew: true
         }
+    }
+
+    async getHierarchyV2 (userId: number) {
+        const {
+            document,
+            isNew
+        } = this.getHierarchy(userId)
+        if (isNew) {
+            const user = await HierarchyRepo.getHierarchy(userId)
+            if (!user) {
+                throw new BlogNotExists()
+            }
+            Y.applyUpdate(document, Y.encodeStateAsUpdate(user))
+        }
+        return document
     }
 
     deleteHierarchy (userId: number) {

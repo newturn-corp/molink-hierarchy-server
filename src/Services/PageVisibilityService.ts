@@ -48,7 +48,7 @@ class PageVisibilityService {
                             const parent = map[parentID]
                             parent.visibility = visibility
                             targetPages.push(parent.id)
-                            this._savePageStatusInRedis(parent)
+                            CacheService.savePageStatusInRedis(parent)
                             yMap.set(parent.id, parent)
                         }
                     }
@@ -71,14 +71,14 @@ class PageVisibilityService {
                             const child = map[childID]
                             child.visibility = visibility
                             targetPages.push(child.id)
-                            this._savePageStatusInRedis(child)
+                            CacheService.savePageStatusInRedis(child)
                             yMap.set(child.id, child)
                         }
                     }
                 }
                 page.visibility = visibility
                 targetPages.push(page.id)
-                this._savePageStatusInRedis(page)
+                CacheService.savePageStatusInRedis(page)
                 yMap.set(page.id, page)
             }, 'server')
             await ESPageRepo.setPagesVisibility(targetPages, visibility)
@@ -91,11 +91,6 @@ class PageVisibilityService {
             }
             throw err
         }
-    }
-
-    private async _savePageStatusInRedis (page: HierarchyDocumentInfoInterface) {
-        console.log(`save page status in redis page-${page.id}`)
-        await CacheService.main.setWithEx(`page-${page.id}`, JSON.stringify(page), 1800)
     }
 }
 export default new PageVisibilityService()
