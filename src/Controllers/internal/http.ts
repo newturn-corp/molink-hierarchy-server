@@ -1,5 +1,10 @@
-import { JsonController, Get, Body, Post, Req } from 'routing-controllers'
-import { makeEmptyResponseMessage, SaveBlogInternalDTO, CreatePageInBlogInternalDTO } from '@newturn-develop/types-molink'
+import { JsonController, Get, Body, Post, Req, Put } from 'routing-controllers'
+import {
+    makeEmptyResponseMessage,
+    SaveBlogInternalDTO,
+    CreatePageInBlogInternalDTO,
+    makeResponseMessage, SetBlogNameDTO
+} from '@newturn-develop/types-molink'
 import { Request } from 'express'
 import env from '../../env'
 import { CustomHttpError } from '../../Errors/HttpError'
@@ -14,14 +19,25 @@ export class InternalMainController {
     }
 
     @Post('/')
-    async saveBlog (@Body() dto: SaveBlogInternalDTO, @Req() req: Request) {
+    async saveBlog (@Req() req: Request, @Body() dto: SaveBlogInternalDTO) {
         const internalAPIKey = req.cookies['internal-api-key']
         if (!internalAPIKey || internalAPIKey !== env.api.internalKey) {
             throw new CustomHttpError(403, 0, '권한이 없습니다.')
         }
         const service = new BlogService()
-        await service.saveBlog(dto)
-        return makeEmptyResponseMessage(201)
+        const responseDTO = await service.saveBlog()
+        return makeResponseMessage(201, responseDTO)
+    }
+
+    @Put('/name')
+    async setBlogName (@Req() req: Request, @Body() dto: SetBlogNameDTO) {
+        const internalAPIKey = req.cookies['internal-api-key']
+        if (!internalAPIKey || internalAPIKey !== env.api.internalKey) {
+            throw new CustomHttpError(403, 0, '권한이 없습니다.')
+        }
+        const service = new BlogService()
+        await service.setBlogNameInternal(dto)
+        return makeEmptyResponseMessage(200)
     }
 
     @Post('/pages')

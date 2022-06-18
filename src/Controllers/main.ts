@@ -15,12 +15,12 @@ export class MainController {
     constructor (client: Client) {
         this.client = client
         this.client.socket.on('message', (message: WSData) => {
-            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} message ${this.client.userId}`)
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} message ${this.client.blogID}`)
             this.handleMessage(new Uint8Array(message as ArrayBuffer))
         })
 
         this.client.socket.on('close', () => {
-            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} close ${this.client.userId}`)
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} close ${this.client.blogID}`)
             this.client.document?.closeWebSocket(this.client.socket)
             if (this.client.pingInterval) {
                 clearInterval(this.client.pingInterval)
