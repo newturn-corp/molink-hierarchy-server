@@ -17,6 +17,11 @@ class BlogRepo extends BaseRepo {
         return this._update(queryString, [name, id])
     }
 
+    setBlogBiography (id: number, biography: string) {
+        const queryString = 'UPDATE BLOG_TB SET biography = ? WHERE id = ?'
+        return this._update(queryString, [biography, id])
+    }
+
     setBlogProfileImageURL (id: number, profileImageURL: string) {
         const queryString = 'UPDATE BLOG_TB SET profile_image_url = ? WHERE id = ?'
         return this._update(queryString, [profileImageURL, id])

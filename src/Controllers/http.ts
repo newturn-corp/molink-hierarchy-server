@@ -1,7 +1,7 @@
-import { JsonController, Get, Put, Authorized, CurrentUser, Body, Param } from 'routing-controllers'
+import { JsonController, Get, Put, Authorized, CurrentUser, Body, Param, Req } from 'routing-controllers'
 import {
     ChangePageVisibilityDTO,
-    makeEmptyResponseMessage,
+    makeEmptyResponseMessage, SetBlogBiographyDTO,
     SetHeaderIconActiveDTO, User
 } from '@newturn-develop/types-molink'
 import PageVisibilityManager from '../Services/PageVisibilityService'
@@ -14,6 +14,8 @@ import {
 } from '../Errors/HierarchyError'
 import { CustomHttpError } from '../Errors/HttpError'
 import { BlogService } from '../Services/BlogService'
+import { BlogProfileService } from '../Services/BlogProfileService'
+import { ViewerAPI } from '../API/ViewerAPI'
 
 @JsonController('')
 export class MainController {

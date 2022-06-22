@@ -20,6 +20,15 @@ class ESBlogRepo {
         )
     }
 
+    async setBlogBiography (blogID: number, biography: string) {
+        await OpenSearch.update(
+            'molink-blog',
+            blogID.toString(), {
+                biography
+            }
+        )
+    }
+
     async setBlogProfileImageURL (blogID: number, profileImageURL: string | null) {
         await OpenSearch.update(
             'molink-blog',

@@ -21,6 +21,7 @@ export class BlogService {
         const profile = doc.getMap('profile')
         profile.set('name', blogName)
         profile.set('profileImageURL', profileImageURL)
+        profile.set('biography', '')
 
         const setting = doc.getMap('setting')
         setting.set('headerIconActive', false)
