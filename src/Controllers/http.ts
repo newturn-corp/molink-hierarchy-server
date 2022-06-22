@@ -2,9 +2,8 @@ import { JsonController, Get, Put, Authorized, CurrentUser, Body, Param } from '
 import {
     ChangePageVisibilityDTO,
     makeEmptyResponseMessage,
-    SetHeaderIconActiveDTO
+    SetHeaderIconActiveDTO, User
 } from '@newturn-develop/types-molink'
-import User from '../Domain/User'
 import PageVisibilityManager from '../Services/PageVisibilityService'
 import {
     BlogNotExists,
@@ -14,7 +13,6 @@ import {
     UnauthorizedForBlog
 } from '../Errors/HierarchyError'
 import { CustomHttpError } from '../Errors/HttpError'
-import ViewerAPI from '../API/ViewerAPI'
 import { BlogService } from '../Services/BlogService'
 
 @JsonController('')
@@ -43,23 +41,23 @@ export class MainController {
         }
     }
 
-    @Put('/header-icon-active')
-    @Authorized()
-    async setHeaderIconActive (@CurrentUser() user: User, @Body() dto: SetHeaderIconActiveDTO) {
-        try {
-            const service = new BlogService()
-            await service.setHeaderIconActive(user, dto)
-            return makeEmptyResponseMessage(200)
-        } catch (err) {
-            if (err instanceof BlogNotExists) {
-                throw new CustomHttpError(404, 0, '블로그가 존재하지 않습니다.')
-            } else if (err instanceof UnauthorizedForBlog) {
-                throw new CustomHttpError(403, 0, '블로그에 대한 권한이 없습니다.')
-            } else {
-                throw err
-            }
-        }
-    }
+    // @Put('/header-icon-active')
+    // @Authorized()
+    // async setHeaderIconActive (@CurrentUser() user: User, @Body() dto: SetHeaderIconActiveDTO) {
+    //     try {
+    //         const service = new BlogService()
+    //         await service.setHeaderIconActive(user, dto)
+    //         return makeEmptyResponseMessage(200)
+    //     } catch (err) {
+    //         if (err instanceof BlogNotExists) {
+    //             throw new CustomHttpError(404, 0, '블로그가 존재하지 않습니다.')
+    //         } else if (err instanceof UnauthorizedForBlog) {
+    //             throw new CustomHttpError(403, 0, '블로그에 대한 권한이 없습니다.')
+    //         } else {
+    //             throw err
+    //         }
+    //     }
+    // }
 }
 
 export default MainController

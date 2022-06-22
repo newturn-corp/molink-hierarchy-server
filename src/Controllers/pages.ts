@@ -2,9 +2,8 @@ import { JsonController, Get, Put, Authorized, CurrentUser, Body, Param, Post } 
 import {
     ChangePageVisibilityDTO,
     CreatePageInBlogDTO, makeEmptyResponseMessage,
-    makeResponseMessage
+    makeResponseMessage, User
 } from '@newturn-develop/types-molink'
-import User from '../Domain/User'
 import { PageService } from '../Services/PageService'
 import PageVisibilityManager from '../Services/PageVisibilityService'
 import { ChildrenVisibilityWide, PageNotExists, ParentVisibilityNarrow } from '../Errors/HierarchyError'

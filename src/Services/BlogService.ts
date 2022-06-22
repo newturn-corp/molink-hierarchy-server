@@ -1,31 +1,76 @@
-import { SaveBlogInternalDTO, SetHeaderIconActiveDTO } from '@newturn-develop/types-molink'
 import * as Y from 'yjs'
-import HierarchyRepo from '../Repositories/HierarchyRepo'
+import { SaveBlogDTO, SaveBlogResponseDTO, SetBlogNameDTO, User, AddBlogUserDTO } from '@newturn-develop/types-molink'
+import ESBlogRepo from '../Repositories/ESBlogRepo'
 import SynchoronizationService from './SynchoronizationService'
-import User from '../Domain/User'
+import UserBlogAuthorityRepo from '../Repositories/UserBlogAuthorityRepo'
 import { UnauthorizedForBlog } from '../Errors/HierarchyError'
+import BlogRepo from '../Repositories/BlogRepo'
+import LiveBlogRepo from '../Repositories/LiveBlogRepo'
+import BlogUserRepo from '../Repositories/BlogUserRepo'
 
 export class BlogService {
-    async saveBlog (dto: SaveBlogInternalDTO) {
+    async saveBlog (dto: SaveBlogDTO) {
+        const blogName = dto.blogName
+        const profileImageURL = null
+
+        const blogID = await BlogRepo.saveBlog(blogName)
         const doc = new Y.Doc()
-        doc.getMap('documentHierarchyInfoMap')
-        doc.getArray('topLevelDocumentIdList')
+        doc.getMap('pageInfoMap')
+        doc.getArray('topLevelPageIDList')
+
+        const profile = doc.getMap('profile')
+        profile.set('name', blogName)
+        profile.set('profileImageURL', profileImageURL)
 
         const setting = doc.getMap('setting')
         setting.set('headerIconActive', false)
-        await HierarchyRepo.persistHierarchyUpdate(dto.userId, Y.encodeStateAsUpdate(doc))
+
+        await LiveBlogRepo.persistBlogUpdate(blogID, Y.encodeStateAsUpdate(doc))
+        await ESBlogRepo.saveBlog(blogID, blogName, profileImageURL)
+        return new SaveBlogResponseDTO(blogID)
     }
 
-    async setHeaderIconActive (user: User, dto: SetHeaderIconActiveDTO) {
-        if (user.id !== dto.id) {
+    public async setBlogName (user: User, dto: SetBlogNameDTO) {
+        const blogUser = await BlogUserRepo.getBlogUser(dto.blogID, user.id)
+        if (!blogUser || !blogUser.authority_set_profile) {
             throw new UnauthorizedForBlog()
         }
+        return this._setBlogName(dto)
+    }
 
-        const hierarchy = await SynchoronizationService.getHierarchyV2(dto.id)
-        const setting = hierarchy.getMap('setting')
-        setting.set('headerIconActive', dto.active)
-        if (hierarchy.destoryable) {
-            hierarchy.destroy()
+    public async setBlogNameInternal (dto: SetBlogNameDTO) {
+        return this._setBlogName(dto)
+    }
+
+    async _setBlogName (dto: SetBlogNameDTO) {
+        const { blogID, name } = dto
+        const blog = await SynchoronizationService.getBlog(blogID)
+        const profile = blog.getMap('profile')
+        profile.set('name', name)
+        await ESBlogRepo.setBlogName(blogID, name)
+        if (blog.destoryable) {
+            blog.destroy()
         }
     }
+
+    public async addBlogUserInternal (dto: AddBlogUserDTO) {
+        return this._addBlogUser(dto)
+    }
+
+    private async _addBlogUser (dto: AddBlogUserDTO) {
+        await BlogUserRepo.saveBlogUser(dto.blogID, dto.userID, dto.authoritySetProfile, dto.authorityHandleFollow)
+    }
+
+    // async setHeaderIconActive (user: User, dto: SetHeaderIconActiveDTO) {
+    //     if (user.id !== dto.id) {
+    //         throw new UnauthorizedForBlog()
+    //     }
+    //
+    //     const hierarchy = await SynchoronizationService.getBlog(dto.id)
+    //     const setting = hierarchy.getMap('setting')
+    //     setting.set('headerIconActive', dto.active)
+    //     if (hierarchy.destoryable) {
+    //         hierarchy.destroy()
+    //     }
+    // }
 }

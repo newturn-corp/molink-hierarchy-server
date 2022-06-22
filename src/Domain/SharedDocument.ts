@@ -7,7 +7,7 @@ import { WebSocket } from 'ws'
 import SynchronizationService from '../Services/SynchoronizationService'
 import CacheService from '../Services/CacheService'
 import { MessageType } from '../Enum'
-import HierarchyRepo from '../Repositories/HierarchyRepo'
+import BlogRepo from '../Repositories/LiveBlogRepo'
 
 export class SharedDocument extends Y.Doc {
     id: number;
@@ -52,7 +52,7 @@ export class SharedDocument extends Y.Doc {
 
         // 웹소켓에서 온 update이면서 socketMap에 저장되어 있으면 persist
         if (origin === 'server' || (origin instanceof WebSocket && document.socketMap.has(origin))) {
-            CacheService.publisher.publishBuffer(document.id, Buffer.from(update)) // do not await
+            await CacheService.publisher.publishBuffer(document.id.toString(), Buffer.from(update)) // do not await
             shouldPersist = true
         }
 
@@ -65,7 +65,7 @@ export class SharedDocument extends Y.Doc {
         })
 
         if (shouldPersist) {
-            await HierarchyRepo.persistHierarchyUpdate(this.id, update)
+            await BlogRepo.persistBlogUpdate(this.id, update)
         }
     }
 
@@ -121,7 +121,7 @@ export class SharedDocument extends Y.Doc {
 
     destroy () {
         super.destroy()
-        SynchronizationService.deleteHierarchy(this.id)
+        SynchronizationService.deleteBlog(this.id)
         CacheService.subscriber.unsubscribe(this.id)
     }
 }
