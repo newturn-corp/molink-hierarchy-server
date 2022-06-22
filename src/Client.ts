@@ -12,7 +12,7 @@ export class Client {
     id: string = ''
     socket: WebSocket
     document: SharedDocument | undefined
-    blogID: string
+    blogID: number
     pongReceived = true
     pingInterval: NodeJS.Timer | undefined
     controller: MainController | undefined
@@ -21,7 +21,7 @@ export class Client {
         this.id = randomUUID()
         this.socket = socket
         this.socket.binaryType = 'arraybuffer'
-        this.blogID = request.url?.slice(1).split('?')[0] as string
+        this.blogID = Number(request.url?.slice(1).split('?')[0])
     }
 
     async init () {

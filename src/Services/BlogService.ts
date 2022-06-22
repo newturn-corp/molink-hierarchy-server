@@ -1,5 +1,5 @@
 import * as Y from 'yjs'
-import { SaveBlogDTO, SaveBlogResponseDTO, SetBlogNameDTO, User } from '@newturn-develop/types-molink'
+import { SaveBlogDTO, SaveBlogResponseDTO, SetBlogNameDTO, User, AddBlogUserDTO } from '@newturn-develop/types-molink'
 import ESBlogRepo from '../Repositories/ESBlogRepo'
 import SynchoronizationService from './SynchoronizationService'
 import UserBlogAuthorityRepo from '../Repositories/UserBlogAuthorityRepo'
@@ -51,6 +51,14 @@ export class BlogService {
         if (blog.destoryable) {
             blog.destroy()
         }
+    }
+
+    public async addBlogUserInternal (dto: AddBlogUserDTO) {
+        return this._addBlogUser(dto)
+    }
+
+    private async _addBlogUser (dto: AddBlogUserDTO) {
+        await BlogUserRepo.saveBlogUser(dto.blogID, dto.userID, dto.authoritySetProfile, dto.authorityHandleFollow)
     }
 
     // async setHeaderIconActive (user: User, dto: SetHeaderIconActiveDTO) {

@@ -11,6 +11,16 @@ class BlogRepo extends BaseRepo {
         const queryString = 'INSERT INTO BLOG_TB(blog_name) VALUES(?)'
         return this._insert(queryString, [name])
     }
+
+    setBlogName (id: number, name: string) {
+        const queryString = 'UPDATE BLOG_TB SET blog_name = ? WHERE id = ?'
+        return this._update(queryString, [name, id])
+    }
+
+    setBlogProfileImageURL (id: number, profileImageURL: string) {
+        const queryString = 'UPDATE BLOG_TB SET profile_image_url = ? WHERE id = ?'
+        return this._update(queryString, [profileImageURL, id])
+    }
 }
 
 export default new BlogRepo()
