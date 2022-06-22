@@ -51,5 +51,3 @@ export class ProfileController {
         return makeEmptyResponseMessage(200)
     }
 }
-
-export default ProfileController

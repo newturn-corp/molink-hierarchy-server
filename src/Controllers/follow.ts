@@ -60,5 +60,3 @@ export class FollowController {
         }
     }
 }
-
-export default FollowController
