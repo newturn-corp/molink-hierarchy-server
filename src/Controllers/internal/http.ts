@@ -23,6 +23,7 @@ import { BlogService } from '../../Services/BlogService'
 import { PageService } from '../../Services/PageService'
 import bodyParser from 'body-parser'
 import { BlogProfileService } from '../../Services/BlogProfileService'
+import { ViewerAPI } from '../../API/ViewerAPI'
 
 @JsonController('/internal')
 export class InternalMainController {
@@ -57,8 +58,8 @@ export class InternalMainController {
     @Authorized()
     @UseBefore(bodyParser.urlencoded({ extended: true }))
     // eslint-disable-next-line no-undef
-    async setProfileImage (@CurrentUser() user: User, @UploadedFile('image', { required: false }) image: Express.Multer.File, @Param('id') blogIDString: string) {
-        const service = new BlogProfileService()
+    async setProfileImage (@CurrentUser() user: User, @UploadedFile('image', { required: false }) image: Express.Multer.File, @Param('id') blogIDString: string, @Req() req: Request) {
+        const service = new BlogProfileService(new ViewerAPI(req))
         await service.setBlogProfileImageInternal(new SetBlogProfileImageDTO(Number(blogIDString), image as any))
         return makeEmptyResponseMessage(200)
     }
