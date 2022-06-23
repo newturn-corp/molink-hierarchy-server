@@ -19,6 +19,7 @@ import {
 import BlogFollowRequestRepo from '../Repositories/BlogFollowRequestRepo'
 import { ViewerAPI } from '../API/ViewerAPI'
 import NotificationRepo from '../Repositories/NotificationRepo'
+import ESBlogRepo from '../Repositories/ESBlogRepo'
 
 export class FollowService {
     viewerAPI: ViewerAPI
@@ -57,6 +58,7 @@ export class FollowService {
         }
         await BlogFollowRequestRepo.setFollowRequestAccepted(request.id)
         await BlogFollowRepo.saveBlogFollow(request.blog_id, request.user_id)
+        await ESBlogRepo.addBlogFollowCount(request.blog_id)
         const followBlog = await BlogRepo.getActiveBlog(request.blog_id) as Blog
         await NotificationRepo.saveNotification(
             request.user_id,

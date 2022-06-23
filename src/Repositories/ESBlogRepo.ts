@@ -6,9 +6,14 @@ class ESBlogRepo {
             'molink-blog',
             'blog', {
                 name,
-                profileImageURL
+                profileImageURL,
+                followerCount: 0
             }, blogID.toString()
         )
+    }
+
+    async addBlogFollowCount (blogID: number) {
+        await OpenSearch.updateWithScript('molink-blog', blogID.toString(), 'ctx._source.followerCount = ctx._source.followerCount + 1')
     }
 
     async setBlogName (blogID: number, name: string) {
