@@ -7,7 +7,8 @@ class ESBlogRepo {
             'blog', {
                 name,
                 profileImageURL,
-                followerCount: 0
+                followerCount: 0,
+                biography: ''
             }, blogID.toString()
         )
     }
