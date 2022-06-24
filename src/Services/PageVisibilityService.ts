@@ -23,11 +23,11 @@ class PageVisibilityService {
         }
 
         blog.transact(() => {
-            if (checkVisibilityWide(visibility, page.visibility) === 1) {
+            if (visibility > page.visibility) {
                 const parentIDList = getParents(map, pageId)
                 const narrowParentIDList = parentIDList.filter(parentID => {
                     const parent = map[parentID]
-                    return checkVisibilityWide(parent.visibility, visibility) === -1
+                    return visibility > parent.visibility
                 })
                 if (narrowParentIDList.length > 0) {
                     if (!force) {
@@ -50,7 +50,7 @@ class PageVisibilityService {
                     if (child.id === pageId) {
                         return false
                     }
-                    return checkVisibilityWide(child.visibility, visibility) === 1
+                    return visibility < child.visibility
                 })
                 if (wideChildrenIDList.length > 0) {
                     if (!force) {
