@@ -55,10 +55,9 @@ export class InternalMainController {
     }
 
     @Put('/:id/profile-image')
-    @Authorized()
     @UseBefore(bodyParser.urlencoded({ extended: true }))
     // eslint-disable-next-line no-undef
-    async setProfileImage (@CurrentUser() user: User, @UploadedFile('image', { required: false }) image: Express.Multer.File, @Param('id') blogIDString: string, @Req() req: Request) {
+    async setProfileImage (@UploadedFile('image', { required: false }) image: Express.Multer.File, @Param('id') blogIDString: string, @Req() req: Request) {
         const service = new BlogProfileService(new ViewerAPI(req))
         await service.setBlogProfileImageInternal(new SetBlogProfileImageDTO(Number(blogIDString), image as any))
         return makeEmptyResponseMessage(200)
