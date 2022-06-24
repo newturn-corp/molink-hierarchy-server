@@ -16,6 +16,7 @@ export class PageService {
             title: dto.title || '새 페이지',
             icon: dto.icon || '📄',
             userId,
+            blogID,
             visibility: PageVisibility.Private,
             order: dto.order,
             parentId: dto.parentId,
