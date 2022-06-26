@@ -1,32 +1,33 @@
 import { SharedDocument } from '../Domain/SharedDocument'
+import * as Y from 'yjs'
+import { BlogNotExists } from '../Errors/HierarchyError'
+import BlogRepo from '../Repositories/LiveBlogRepo'
 
 class SynchronizationService {
-    private hierarchyMap = new Map<number, SharedDocument>()
+    private blogMap = new Map<number, SharedDocument>()
 
-    getHierarchy (userId: number) {
-        const existing = this.hierarchyMap.get(userId)
+    async getBlog (blogID: number) {
+        const existing = this.blogMap.get(blogID)
         if (existing) {
-            return {
-                document: existing,
-                isNew: false
-            }
+            return existing
         }
-
-        const document = new SharedDocument(userId)
+        const persistedBlog = await BlogRepo.getBlog(blogID)
+        if (!persistedBlog) {
+            throw new BlogNotExists()
+        }
+        const document = new SharedDocument(blogID)
         document.gc = true
-        this.hierarchyMap.set(userId, document)
-        return {
-            document,
-            isNew: true
-        }
+        this.blogMap.set(blogID, document)
+        Y.applyUpdate(document, Y.encodeStateAsUpdate(persistedBlog))
+        return document
     }
 
-    deleteHierarchy (userId: number) {
-        this.hierarchyMap.delete(userId)
+    deleteBlog (blogID: number) {
+        this.blogMap.delete(blogID)
     }
 
     getServiceStats () {
-        const documents = this.hierarchyMap.values()
+        const documents = this.blogMap.values()
         let documentCount = 0
         let totalUserCount = 0
         let maxUserCount = 0

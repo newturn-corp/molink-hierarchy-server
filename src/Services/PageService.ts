@@ -1,31 +1,22 @@
-import { CreatePageInBlogDTO, HierarchyDocumentInfoInterface, PageVisibility } from '@newturn-develop/types-molink'
+import {
+    CreatePageInBlogDTO,
+    HierarchyDocumentInfoInterface,
+    PageVisibility
+} from '@newturn-develop/types-molink'
 import CacheService from './CacheService'
 import SynchronizationService from './SynchoronizationService'
-import HierarchyRepo from '../Repositories/HierarchyRepo'
-import * as Y from 'yjs'
-import { ChildrenVisibilityWide, PageNotExists, ParentVisibilityNarrow } from '../Errors/HierarchyError'
-import { checkVisibilityWide, getChildren, getParents } from '@newturn-develop/molink-utils'
-import ESPageRepo from '../Repositories/ESPageRepo'
 
 export class PageService {
     async createPage (userId: number, dto: CreatePageInBlogDTO) {
-        const { order, parentId } = dto
-        const { document, isNew } = SynchronizationService.getHierarchy(userId)
-        if (isNew) {
-            let hierarchy = await HierarchyRepo.getHierarchy(userId)
-            if (!hierarchy) {
-                hierarchy = new Y.Doc()
-                await HierarchyRepo.persistHierarchyUpdate(userId, Y.encodeStateAsUpdate(hierarchy))
-            }
-
-            Y.applyUpdate(document, Y.encodeStateAsUpdate(hierarchy))
-        }
+        const { order, parentId, blogID } = dto
+        const blog = await SynchronizationService.getBlog(blogID)
 
         const newPage: HierarchyDocumentInfoInterface = {
             id: dto.id,
             title: dto.title || '새 페이지',
             icon: dto.icon || '📄',
             userId,
+            blogID,
             visibility: PageVisibility.Private,
             order: dto.order,
             parentId: dto.parentId,
@@ -34,10 +25,10 @@ export class PageService {
             children: []
         }
 
-        const yMap = document.getMap('documentHierarchyInfoMap')
-        const yTopLevelDocumentIdList = document.getArray('topLevelDocumentIdList')
+        const yMap = blog.getMap('pageInfoMap')
+        const yTopLevelDocumentIdList = blog.getArray('topLevelPageIDList')
 
-        document.transact(() => {
+        blog.transact(() => {
             yMap.set(newPage.id, newPage)
             if (parentId === null) {
                 yTopLevelDocumentIdList.insert(order, [newPage.id])
@@ -59,8 +50,8 @@ export class PageService {
                 yMap.set(parentId, parent)
             }
         }, 'server')
-        if (document.destoryable) {
-            document.destroy()
+        if (blog.destoryable) {
+            blog.destroy()
         }
 
         await CacheService.main.setWithEx(`page-${dto.id}`, JSON.stringify(newPage), 1800)
