@@ -68,10 +68,6 @@ export class PageService {
 
     async updatePageTitle (dto: UpdatePageTitleInBlogDTO) {
         const { blogID, pageID, title } = dto
-        const authority = await this.viewerAPI.getBlogAuthority(blogID)
-        if (!authority.editable) {
-            throw new UnauthorizedForBlog()
-        }
         const blog = await SynchronizationService.getBlog(blogID)
         try {
             const yMap = blog.getMap<HierarchyDocumentInfoInterface>('pageInfoMap')
@@ -96,10 +92,6 @@ export class PageService {
 
     async updatePageHeaderIcon (dto: UpdatePageHeaderIconInBlogDTO) {
         const { blogID, pageID, icon } = dto
-        const authority = await this.viewerAPI.getBlogAuthority(blogID)
-        if (!authority.editable) {
-            throw new UnauthorizedForBlog()
-        }
         const blog = await SynchronizationService.getBlog(blogID)
         try {
             const yMap = blog.getMap<HierarchyDocumentInfoInterface>('pageInfoMap')
