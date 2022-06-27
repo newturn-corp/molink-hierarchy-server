@@ -1,12 +1,20 @@
 import {
     CreatePageInBlogDTO,
     HierarchyDocumentInfoInterface,
-    PageVisibility
+    PageVisibility, UpdatePageHeaderIconInBlogDTO, UpdatePageTitleInBlogDTO
 } from '@newturn-develop/types-molink'
 import CacheService from './CacheService'
 import SynchronizationService from './SynchoronizationService'
+import { PageNotExists, UnauthorizedForBlog } from '../Errors/HierarchyError'
+import { ViewerAPI } from '../API/ViewerAPI'
 
 export class PageService {
+    viewerAPI: ViewerAPI
+
+    constructor (viewerAPI: ViewerAPI) {
+        this.viewerAPI = viewerAPI
+    }
+
     async createPage (userId: number, dto: CreatePageInBlogDTO) {
         const { order, parentId, blogID } = dto
         const blog = await SynchronizationService.getBlog(blogID)
@@ -56,5 +64,61 @@ export class PageService {
 
         await CacheService.main.setWithEx(`page-${dto.id}`, JSON.stringify(newPage), 1800)
         return newPage
+    }
+
+    async updatePageTitle (dto: UpdatePageTitleInBlogDTO) {
+        const { blogID, pageID, title } = dto
+        const authority = await this.viewerAPI.getBlogAuthority(blogID)
+        if (!authority.editable) {
+            throw new UnauthorizedForBlog()
+        }
+        const blog = await SynchronizationService.getBlog(blogID)
+        try {
+            const yMap = blog.getMap<HierarchyDocumentInfoInterface>('pageInfoMap')
+            const page = yMap.get(pageID)
+            if (!page) {
+                throw new PageNotExists()
+            }
+            blog.transact(() => {
+                page.title = title
+                yMap.set(page.id, page)
+            }, 'server')
+            if (blog.destoryable) {
+                blog.destroy()
+            }
+        } catch (err) {
+            if (blog.destoryable) {
+                blog.destroy()
+            }
+            throw err
+        }
+    }
+
+    async updatePageHeaderIcon (dto: UpdatePageHeaderIconInBlogDTO) {
+        const { blogID, pageID, icon } = dto
+        const authority = await this.viewerAPI.getBlogAuthority(blogID)
+        if (!authority.editable) {
+            throw new UnauthorizedForBlog()
+        }
+        const blog = await SynchronizationService.getBlog(blogID)
+        try {
+            const yMap = blog.getMap<HierarchyDocumentInfoInterface>('pageInfoMap')
+            const page = yMap.get(pageID)
+            if (!page) {
+                throw new PageNotExists()
+            }
+            blog.transact(() => {
+                page.icon = icon
+                yMap.set(page.id, page)
+            }, 'server')
+            if (blog.destoryable) {
+                blog.destroy()
+            }
+        } catch (err) {
+            if (blog.destoryable) {
+                blog.destroy()
+            }
+            throw err
+        }
     }
 }
