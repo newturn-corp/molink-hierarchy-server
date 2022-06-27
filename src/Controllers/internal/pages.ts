@@ -17,7 +17,6 @@ import env from '../../env'
 @JsonController('/internal/pages')
 export class InternalPageController {
     @Put('/title')
-    @Authorized()
     async updatePageTitle (@CurrentUser() user: User, @Body() dto: UpdatePageTitleInBlogDTO, @Req() req: Request) {
         const internalAPIKey = req.cookies['internal-api-key']
         if (!internalAPIKey || internalAPIKey !== env.api.internalKey) {
@@ -41,7 +40,6 @@ export class InternalPageController {
     }
 
     @Put('/icon')
-    @Authorized()
     async updatePageHeaderIcon (@CurrentUser() user: User, @Body() dto: UpdatePageHeaderIconInBlogDTO, @Req() req: Request) {
         const internalAPIKey = req.cookies['internal-api-key']
         if (!internalAPIKey || internalAPIKey !== env.api.internalKey) {
