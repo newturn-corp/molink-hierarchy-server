@@ -69,7 +69,7 @@ export class InternalMainController {
         if (!internalAPIKey || internalAPIKey !== env.api.internalKey) {
             throw new CustomHttpError(403, 0, '권한이 없습니다.')
         }
-        const service = new PageService()
+        const service = new PageService(new ViewerAPI(req))
         await service.createPage(dto.userId, dto)
         return makeEmptyResponseMessage(201)
     }
