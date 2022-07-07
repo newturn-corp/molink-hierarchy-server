@@ -7,10 +7,11 @@ import { WebSocket } from 'ws'
 import SynchronizationService from '../Services/SynchoronizationService'
 import CacheService from '../Services/CacheService'
 import { MessageType } from '../Enum'
-import BlogRepo from '../Repositories/LiveBlogRepo'
+import LiveBlogRepo from '../Repositories/LiveBlogRepo'
 
 export class SharedDocument extends Y.Doc {
     id: number;
+    channel: string
     awarenessChannel: string;
     mux: mutex.mutex;
     socketMap: Map<WebSocket, Set<number>>;
@@ -19,7 +20,8 @@ export class SharedDocument extends Y.Doc {
     constructor (id: number) {
         super()
         this.id = id
-        this.awarenessChannel = `${id}-awareness`
+        this.channel = `blog-${id}`
+        this.awarenessChannel = `blog-${id}-awareness`
         this.mux = mutex.createMutex()
         this.socketMap = new Map()
         this.awareness = new awarenessProtocol.Awareness(this)
@@ -27,14 +29,14 @@ export class SharedDocument extends Y.Doc {
         this.awareness.on('update', ({ added, updated, removed }: { added: number[], updated: number[], removed: number[] }, origin: any) => this.handleAwarenessChange({ added, updated, removed }, origin))
         this.on('update', (update: Uint8Array, origin: any, doc: SharedDocument) => this.handleUpdate(update, origin, doc))
 
-        CacheService.subscriber.subscribe([this.id, this.awarenessChannel]).then(() => {
+        CacheService.subscriber.subscribe([this.channel, this.awarenessChannel]).then(() => {
             CacheService.subscriber.on('messageBuffer', (channel: any, update: any) => {
                 const channelId = channel.toString()
 
                 // update is a Buffer, Buffer is a subclass of Uint8Array, update can be applied
                 // as an update directly
 
-                if (channelId === this.id) {
+                if (channelId === this.channel) {
                     Y.applyUpdate(this, update, CacheService.subscriber)
                 } else if (channelId === this.awarenessChannel) {
                     awarenessProtocol.applyAwarenessUpdate(this.awareness, update, CacheService.subscriber)
@@ -43,16 +45,12 @@ export class SharedDocument extends Y.Doc {
         })
     }
 
-    get destoryable () {
-        return this.socketMap.size === 0
-    }
-
     private async handleUpdate (update: Uint8Array, origin: any, document: SharedDocument) {
         let shouldPersist = false
 
         // 웹소켓에서 온 update이면서 socketMap에 저장되어 있으면 persist
         if (origin === 'server' || (origin instanceof WebSocket && document.socketMap.has(origin))) {
-            await CacheService.publisher.publishBuffer(document.id.toString(), Buffer.from(update)) // do not await
+            await CacheService.publisher.publishBuffer(document.channel, Buffer.from(update)) // do not await
             shouldPersist = true
         }
 
@@ -65,7 +63,7 @@ export class SharedDocument extends Y.Doc {
         })
 
         if (shouldPersist) {
-            await BlogRepo.persistBlogUpdate(this.id, update)
+            await LiveBlogRepo.persistBlogUpdate(this.id, update)
         }
     }
 
@@ -111,17 +109,21 @@ export class SharedDocument extends Y.Doc {
             this.socketMap.delete(socket)
             awarenessProtocol.removeAwarenessStates(this.awareness, Array.from(controlledIds), null)
 
-            if (this.destoryable) {
+            if (this.socketMap.size === 0) {
                 this.destroy()
+                SynchronizationService.deleteBlog(this.id)
             }
         }
 
         socket.close()
     }
 
+    get destoryable () {
+        return this.socketMap.size === 0
+    }
+
     destroy () {
         super.destroy()
-        SynchronizationService.deleteBlog(this.id)
-        CacheService.subscriber.unsubscribe(this.id)
+        CacheService.subscriber.unsubscribe(this.channel)
     }
 }
