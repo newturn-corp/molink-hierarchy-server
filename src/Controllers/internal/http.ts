@@ -14,7 +14,13 @@ import {
     makeEmptyResponseMessage,
     SaveBlogInternalDTO,
     CreatePageInBlogInternalDTO,
-    makeResponseMessage, SetBlogNameDTO, AddBlogUserDTO, SaveBlogDTO, User, SetBlogProfileImageDTO
+    makeResponseMessage,
+    SetBlogNameDTO,
+    AddBlogUserDTO,
+    SaveBlogDTO,
+    User,
+    SetBlogProfileImageDTO,
+    SaveBlogNotificationInternalDTO
 } from '@newturn-develop/types-molink'
 import { Request } from 'express'
 import env from '../../env'
@@ -24,6 +30,7 @@ import { PageService } from '../../Services/PageService'
 import bodyParser from 'body-parser'
 import { BlogProfileService } from '../../Services/BlogProfileService'
 import { ViewerAPI } from '../../API/ViewerAPI'
+import { NotificationService } from '../../Services/NotificationService'
 
 @JsonController('/internal')
 export class InternalMainController {
@@ -82,6 +89,17 @@ export class InternalMainController {
         }
         const service = new BlogService()
         await service.addBlogUserInternal(dto)
+        return makeEmptyResponseMessage(201)
+    }
+
+    @Post('/notifications')
+    async saveNotifications (@Body() dto: SaveBlogNotificationInternalDTO, @Req() req: Request) {
+        const internalAPIKey = req.cookies['internal-api-key']
+        if (!internalAPIKey || internalAPIKey !== env.api.internalKey) {
+            throw new CustomHttpError(403, 0, '권한이 없습니다.')
+        }
+        const service = new NotificationService(new ViewerAPI(req))
+        await service.saveBlogNotifications(dto)
         return makeEmptyResponseMessage(201)
     }
 }

@@ -7,6 +7,11 @@ class BlogUserRepo extends BaseRepo {
         return this._selectSingular(queryString, [blogID, userID])
     }
 
+    getBlogUsersOfBlog (blogID: number): Promise<BlogUser[]> {
+        const queryString = 'SELECT * FROM BLOG_USER_TB WHERE blog_id = ?'
+        return this._selectPlural(queryString, [blogID])
+    }
+
     saveBlogUser (blogID: number, userID: number, authoritySetProfile: boolean, authorityHandleFollow: boolean): Promise<BlogUser | undefined> {
         const queryString = 'INSERT INTO BLOG_USER_TB(user_id, blog_id, authority_set_profile, authority_handle_follow) VALUES(?, ?, ?, ?)'
         return this._selectSingular(queryString, [userID, blogID, Number(authoritySetProfile), Number(authorityHandleFollow)])

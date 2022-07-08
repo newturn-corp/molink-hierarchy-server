@@ -7,6 +7,7 @@ import { FollowController } from '../Controllers/follow'
 import { ProfileController } from '../Controllers/profile'
 import { MainController } from '../Controllers/http'
 import InternalPageController from '../Controllers/internal/pages'
+import NotificationController from '../Controllers/notifications'
 
 const routingControllersOptions: RoutingControllersOptions = {
     defaultErrorHandler: false,
@@ -17,7 +18,8 @@ const routingControllersOptions: RoutingControllersOptions = {
         InternalMainController,
         FollowController,
         ProfileController,
-        InternalPageController
+        InternalPageController,
+        NotificationController
     ],
     authorizationChecker: AuthMiddleware.authorization,
     currentUserChecker: AuthMiddleware.currentUser
