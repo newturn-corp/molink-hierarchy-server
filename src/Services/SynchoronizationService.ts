@@ -6,6 +6,32 @@ import BlogRepo from '../Repositories/LiveBlogRepo'
 class SynchronizationService {
     private blogMap = new Map<number, SharedDocument>()
 
+    getRawBlog (blogID: number) {
+        const existing = this.blogMap.get(blogID)
+        if (existing) {
+            return {
+                document: existing,
+                isNew: false
+            }
+        }
+
+        const document = new SharedDocument(blogID)
+        document.gc = true
+        this.blogMap.set(blogID, document)
+        return {
+            document,
+            isNew: true
+        }
+    }
+
+    async syncWithDB (blogID: number, document: Y.Doc) {
+        const persistedBlog = await BlogRepo.getBlog(blogID)
+        if (!persistedBlog) {
+            throw new BlogNotExists()
+        }
+        Y.applyUpdate(document, Y.encodeStateAsUpdate(persistedBlog))
+    }
+
     async getBlog (blogID: number) {
         const existing = this.blogMap.get(blogID)
         if (existing) {
