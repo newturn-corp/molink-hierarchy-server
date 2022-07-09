@@ -39,6 +39,7 @@ export class MainController {
         const document = this.client.document as SharedDocument
         switch (messageType) {
         case MessageType.MessageSync: {
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${this.client.id} send sync message ${this.client.blogID}`)
             encoding.writeVarUint(encoder, MessageType.MessageSync)
             syncProtocol.readSyncMessage(decoder, encoder, document, this.client.socket)
 
@@ -48,6 +49,7 @@ export class MainController {
             break
         }
         case MessageType.MessageAwareness: {
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${this.client.id} send awareness message ${this.client.blogID}`)
             const update = decoding.readVarUint8Array(decoder)
             CacheService.publisher.publishBuffer(document.awarenessChannel, Buffer.from(update))
             awarenessProtocol.applyAwarenessUpdate(document.awareness, update, this.client.socket)

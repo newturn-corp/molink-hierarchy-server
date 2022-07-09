@@ -25,7 +25,8 @@ export class Client {
     }
 
     async init () {
-        this.document = await SynchronizationService.getBlog(this.blogID)
+        const { document, isNew } = SynchronizationService.getRawBlog(this.blogID)
+        this.document = document
         this.document.socketMap.set(this.socket, new Set())
         this.controller = new MainController(this)
 
@@ -64,6 +65,10 @@ export class Client {
                 encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(this.document.awareness, Array.from(awarenessStates.keys())))
                 this.document.send(this.socket, encoding.toUint8Array(encoder))
             }
+        }
+
+        if (isNew) {
+            await SynchronizationService.syncWithDB(this.blogID, this.document)
         }
     }
 }
