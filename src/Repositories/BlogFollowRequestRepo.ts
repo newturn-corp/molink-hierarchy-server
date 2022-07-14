@@ -12,9 +12,9 @@ class BlogFollowRequestRepo extends BaseRepo {
         return this._check(queryString, [blogID, userID])
     }
 
-    getUserActiveBlogFollowRequests (userID: number): Promise<BlogFollowRequest[]> {
-        const queryString = 'SELECT * FROM BLOG_FOLLOW_REQUEST_TB WHERE user_id = ? AND rejected_at IS NULL AND accepted_at IS NULL'
-        return this._selectPlural(queryString, [userID])
+    getActiveBlogFollowRequests (blogID: number): Promise<BlogFollowRequest[]> {
+        const queryString = 'SELECT * FROM BLOG_FOLLOW_REQUEST_TB WHERE blog_id = ? AND rejected_at IS NULL AND accepted_at IS NULL'
+        return this._selectPlural(queryString, [blogID])
     }
 
     getBlogFollowRequest (id: number): Promise<BlogFollowRequest> {

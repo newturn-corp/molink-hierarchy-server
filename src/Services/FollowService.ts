@@ -1,6 +1,6 @@
 import {
-    AcceptFollowRequestDTO, Blog,
-    FollowRequestDTO,
+    AcceptFollowRequestDTO, Blog, ESUser,
+    FollowRequestDTO, FollowRequestInfo,
     GetFollowMapResponseDTO,
     GetMyFollowRequestResponseDTO,
     NotificationType,
@@ -20,12 +20,36 @@ import BlogFollowRequestRepo from '../Repositories/BlogFollowRequestRepo'
 import { ViewerAPI } from '../API/ViewerAPI'
 import NotificationRepo from '../Repositories/NotificationRepo'
 import ESBlogRepo from '../Repositories/ESBlogRepo'
+import ESUserRepo from '../Repositories/ESUserRepo'
 
 export class FollowService {
     viewerAPI: ViewerAPI
 
     constructor (viewerAPI: ViewerAPI) {
         this.viewerAPI = viewerAPI
+    }
+
+    // 특정 블로그의 팔로우 요청들을 가져오는 API
+    async getActiveBlogFollowRequests (user: User, blogID: number) {
+        const authority = await this.viewerAPI.getBlogAuthority(blogID)
+        if (!authority.handleFollow) {
+            throw new UnauthorizedForBlog()
+        }
+        const requests = await BlogFollowRequestRepo.getActiveBlogFollowRequests(user.id)
+        const followers = await ESUserRepo.getUserInfoListByIdList(requests.map(req => req.user_id))
+        const followerMap = new Map<number, ESUser>()
+        followers.forEach(follower => followerMap.set(Number(follower.id), follower))
+        return requests.map(request => {
+            const follower = followerMap.get(request.user_id) as ESUser
+            return new FollowRequestInfo(
+                request.id,
+                Number(follower.id),
+                follower.profileImageUrl,
+                follower.nickname,
+                !!request.viewed_at,
+                request.created_at
+            )
+        })
     }
 
     async rejectBlogFollowRequest (user: User, dto: RejectFollowRequestDTO) {

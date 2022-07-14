@@ -59,4 +59,20 @@ export class FollowController {
             }
         }
     }
+
+    @Get('/:blogID/requests')
+    @Authorized()
+    async getActiveBlogFollowRequest (@CurrentUser() user: User, @Req() req: Request, @Param('blogID') blogIDString: string) {
+        try {
+            const service = new FollowService(new ViewerAPI(req))
+            const arr = await service.getActiveBlogFollowRequests(user, Number(blogIDString))
+            return makeResponseMessage(200, arr)
+        } catch (err) {
+            if (err instanceof UnauthorizedForBlog) {
+                throw new CustomHttpError(403, 1, '권한이 없습니다.')
+            } else {
+                throw err
+            }
+        }
+    }
 }

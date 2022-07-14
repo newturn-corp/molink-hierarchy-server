@@ -1,7 +1,7 @@
 import { BaseRepo } from '@newturn-develop/molink-utils'
 import { BlogNotification, BlogNotificationType, Notification, NotificationType } from '@newturn-develop/types-molink'
 
-class NotificationRepo extends BaseRepo {
+class BlogNotificationRepo extends BaseRepo {
     public getActiveNotifications (userID: number, blogID: number): Promise<BlogNotification[]> {
         const queryString = 'SELECT * FROM BLOG_NOTIFICATION_TB WHERE blog_id = ? AND user_id = ? AND checked_at IS NULL'
         return this._selectPlural(queryString, [blogID, userID])
@@ -22,4 +22,4 @@ class NotificationRepo extends BaseRepo {
         return this._insert(queryString, [blogID, userID, notificationType, content, additionalInfo])
     }
 }
-export default new NotificationRepo()
+export default new BlogNotificationRepo()
